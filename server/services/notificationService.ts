@@ -320,7 +320,11 @@ En cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio e
     }
 
     if (settings.notificationChannels.whatsappOperator && assignedOp && assignedOp.phone) {
-      const { text, url } = whatsappService.generateOperatorMessage(booking, tour, assignedOp, settings);
+      const isPaid = booking.paymentStatus === 'completed';
+      const { text, url } = isPaid
+        ? whatsappService.generateOperatorPaidMessage(booking, tour, assignedOp, settings)
+        : whatsappService.generateOperatorMessage(booking, tour, assignedOp, settings);
+
       await whatsappService.sendViaApi(assignedOp.phone, text, settings.whatsappConfig);
 
       db.addNotification({
@@ -331,7 +335,7 @@ En cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio e
         recipientRole: 'operator',
         recipientName: assignedOp.name,
         recipientContact: assignedOp.phone,
-        title: `WhatsApp al Operario (${assignedOp.name})`,
+        title: isPaid ? `Confirmación de Pago #${booking.code}` : `Asignación de Tour #${booking.code}`,
         message: text,
         status: 'delivered',
         timestamp: new Date().toISOString(),

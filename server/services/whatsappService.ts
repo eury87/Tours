@@ -79,6 +79,33 @@ ${booking.passengers.map(p => `- ${p.fullName}: ${p.specialRequirements || 'Sin 
   }
 
   /**
+   * Genera el mensaje final para el operario cuando el grupo ya completó el pago del 100%
+   */
+  public generateOperatorPaidMessage(booking: Booking, tour: Tour, operator: Operator, settings: SystemSettings): { text: string; url: string } {
+    const cleanPhone = operator.phone.replace(/[^0-9]/g, '');
+
+    const text =
+`🎉 *¡GRUPO 100% PAGADO Y CONFIRMADO!* - ${settings.businessName.toUpperCase()} 🚨
+
+Hola *${operator.name}*, el cliente *${booking.leadCustomer.fullName}* ha completado el pago de la reserva *${booking.code}* (${tour.title}).
+
+🧾 *Factura Oficial:* ${booking.invoiceNumber || `FACT-2026-${booking.code.replace('TOUR-2026-', '')}`}
+📅 *Fecha:* ${booking.date} | ⏰ *Hora:* ${booking.timeSlot}
+👥 *Total Pasajeros:* ${booking.totalPassengers} (${booking.adultsCount} Adultos${booking.childrenCount > 0 ? `, ${booking.childrenCount} Niños` : ''})
+👤 *Cliente Líder:* ${booking.leadCustomer.fullName} (${booking.leadCustomer.phone})
+📍 *Punto de Encuentro:* ${tour.meetingPoint.name}
+📌 *Ubicación Maps:* ${tour.meetingPoint.googleMapsUrl}
+
+📝 *Lista de Pasajeros:*
+${booking.passengers.map(p => `- ${p.fullName} (${p.documentType || 'DOC'}: ${p.documentNumber || 'N/A'})${p.specialRequirements ? ` | ${p.specialRequirements}` : ''}`).join('\n')}
+
+📲 El grupo ya cuenta con su código QR de abordaje emitido. Todo listo para la salida.`;
+
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+    return { text, url };
+  }
+
+  /**
    * Genera el mensaje para el dueño / administrador
    */
   public generateOwnerMessage(booking: Booking, tour: Tour, settings: SystemSettings): { text: string; url: string } {

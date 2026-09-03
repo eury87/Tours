@@ -235,28 +235,10 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
         if (tour) {
           const operator = updated.assignedOperatorId ? db.getOperatorById(updated.assignedOperatorId) : undefined;
           
-          // 1. Notificaciones al cliente (Email con CC a plataforma + WhatsApp) en background
+          // Notificaciones multicanal (Email con Factura al cliente + WhatsApp con Hoja de Ruta al guía)
           notificationService.dispatchBookingNotifications(updated, tour, operator).catch(err => {
             console.error('[Bookings] Error enviando notificaciones post-pago:', err);
           });
-
-          // 2. WhatsApp específico al Operario confirmando que el grupo pagó el 100%
-          if (operator) {
-            import('../services/whatsappQrService').then(({ whatsappQrService }) => {
-              const isReady = typeof whatsappQrService.isActive === 'function' 
-                ? whatsappQrService.isActive() 
-                : whatsappQrService.getStatus().connected;
-
-              if (isReady) {
-                whatsappQrService.sendMessage(
-                  operator.phone,
-                  `🎉 *¡GRUPO 100% PAGADO Y CONFIRMADO!* 🚨\n\nHola *${operator.name}*, el cliente *${updated.leadCustomer.fullName}* ha completado el pago de la reserva *${updated.code}* (${tour.title}).\n\n🧾 *Factura Oficial:* ${updated.invoiceNumber}\n👥 *Total Pasajeros:* ${updated.totalPassengers}\n📲 El grupo ya cuenta con su código QR de abordaje. Todo listo para la salida.`
-                ).catch((e: any) => console.error('[Bookings] Error WhatsApp operario:', e));
-              }
-            }).catch(qrErr => {
-              console.error('[Bookings] Error cargando whatsappQrService:', qrErr);
-            });
-          }
         }
       }
       return;
