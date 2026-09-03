@@ -203,7 +203,6 @@ export class NotificationService {
         console.error('[Email] Error enviando correo a cliente:', err);
       }
     }
-    }
 
     // 3. EMAIL AL PROPIETARIO / ADMINISTRACIÓN
     if (settings.notificationChannels.emailOwner && settings.businessEmail) {
