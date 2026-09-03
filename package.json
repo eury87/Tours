@@ -1,0 +1,37 @@
+{
+  "name": "tours-booking-platform",
+  "version": "1.0.0",
+  "description": "Sistema integral de reservas de tours online con notificaciones multicanal (Email, WhatsApp, In-App) y pasarela de pagos.",
+  "main": "server/index.js",
+  "scripts": {
+    "server": "npx.cmd tsx watch server/index.ts",
+    "client": "npm.cmd run dev --prefix client",
+    "dev": "npx.cmd concurrently \"npm.cmd run server\" \"npm.cmd run client\"",
+    "build": "npm.cmd run build --prefix client",
+    "db:migrate": "npx tsx server/scripts/migrateToSupabase.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "link-preview-js": "^3.2.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.4",
+    "@types/nodemailer": "^6.4.17",
+    "@types/qrcode": "^1.5.6",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

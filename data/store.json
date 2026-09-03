@@ -1,0 +1,777 @@
+{
+  "companies": [
+    {
+      "id": "comp-1",
+      "name": "TerraAventura Expeditions",
+      "slug": "terra-aventura",
+      "plan": "Enterprise",
+      "status": "active",
+      "ownerEmail": "owner@terraaventura.com",
+      "createdAt": "2026-01-10T10:00:00Z"
+    },
+    {
+      "id": "comp-2",
+      "name": "Andean Secrets Travel",
+      "slug": "andean-secrets",
+      "plan": "Pro",
+      "status": "active",
+      "ownerEmail": "admin@andeansecrets.com",
+      "createdAt": "2026-02-01T12:00:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-superadmin",
+      "name": "Alex Rivera (SaaS Owner)",
+      "email": "superadmin@tourspro.com",
+      "role": "superadmin",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80"
+    },
+    {
+      "id": "usr-owner",
+      "name": "Lucía Benítez (Dueño Agencia)",
+      "email": "owner@terraaventura.com",
+      "role": "company_admin",
+      "companyId": "comp-1",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
+    },
+    {
+      "id": "usr-guide-1",
+      "name": "Carlos Mendoza (Guía Oficial)",
+      "email": "carlos.mendoza@terraaventura.com",
+      "role": "operator",
+      "companyId": "comp-1",
+      "operatorId": "op-1",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+    },
+    {
+      "id": "usr-customer",
+      "name": "Visitante / Cliente",
+      "email": "cliente@ejemplo.com",
+      "role": "customer",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"
+    }
+  ],
+  "coupons": [
+    {
+      "id": "cpn-1",
+      "code": "WELCOME10",
+      "description": "10% de descuento de bienvenida en tu primera reserva",
+      "discountType": "percentage",
+      "discountValue": 10,
+      "minSpend": 50,
+      "usedCount": 15,
+      "active": true
+    },
+    {
+      "id": "cpn-2",
+      "code": "VIPTOUR25",
+      "description": "$25 USD de descuento en expediciones seleccionadas",
+      "discountType": "fixed",
+      "discountValue": 25,
+      "minSpend": 100,
+      "usedCount": 6,
+      "active": true
+    },
+    {
+      "id": "cpn-3",
+      "code": "EARLYBIRD",
+      "description": "15% de descuento por reserva anticipada",
+      "discountType": "percentage",
+      "discountValue": 15,
+      "minSpend": 70,
+      "usedCount": 22,
+      "active": true
+    }
+  ],
+  "tours": [
+    {
+      "id": "tour-1",
+      "title": "Expedición a la Selva Mágica & Cascadas Secretas",
+      "tagline": "Aventura 4x4, tirolesa panorámica y baño en aguas cristalinas",
+      "description": "Sumérgete en el corazón del bosque tropical con guías botánicos certificados. Descubre senderos vírgenes, cascadas ocultas y degusta un almuerzo campestre con ingredientes autóctonos.",
+      "destination": "Parque Nacional Valle Esmeralda",
+      "category": "Aventura",
+      "price": 85,
+      "childPrice": 55,
+      "duration": "7 Horas (Día Completo)",
+      "difficulty": "Moderado",
+      "maxCapacity": 14,
+      "meetingPoint": {
+        "name": "Base Aventura TerraAventura - Módulo 3",
+        "address": "Km 14 Carretera a los Bosques, Valle Esmeralda",
+        "googleMapsUrl": "https://maps.google.com/?q=-13.163141,-72.544963",
+        "pickupAvailable": true
+      },
+      "timeSlots": [
+        "07:30 AM",
+        "09:00 AM"
+      ],
+      "included": [
+        "Transporte 4x4 ida y vuelta desde el hotel",
+        "Guía oficial bilingüe especializado en fauna y flora",
+        "Equipo completo de seguridad y tirolesa certificada",
+        "Almuerzo buffet campestre gourmet",
+        "Snacks energéticos e hidratación ilimitada",
+        "Seguro de accidentes contra todo riesgo"
+      ],
+      "notIncluded": [
+        "Bebidas alcohólicas premium",
+        "Fotografía profesional (disponible como extra)",
+        "Propinas para el equipo de ruta"
+      ],
+      "itinerary": [
+        {
+          "time": "07:30 AM",
+          "title": "Recogida en Hotel",
+          "desc": "Encuentro con el guía y traslado en vehículo 4x4 climatizado."
+        },
+        {
+          "time": "09:00 AM",
+          "title": "Senderismo Botánico",
+          "desc": "Caminata guiada identificando aves tropicales y plantas medicinales."
+        },
+        {
+          "time": "11:30 AM",
+          "title": "Cascada Cristalina & Tirolesa",
+          "desc": "Tiempo libre para nadar y vuelo panorámico sobre el dosel arbóreo."
+        },
+        {
+          "time": "01:30 PM",
+          "title": "Almuerzo Campestre de Autor",
+          "desc": "Banquete de la selva con pesca del día y frutas exóticas."
+        },
+        {
+          "time": "03:30 PM",
+          "title": "Retorno a la Ciudad",
+          "desc": "Llegada confortable directo a su alojamiento."
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "rating": 4.95,
+      "reviewsCount": 312,
+      "featured": true,
+      "requiresOperatorApproval": true
+    },
+    {
+      "id": "tour-2",
+      "title": "Safari Marino: Ballenas, Delfines & Arrecifes de Coral",
+      "tagline": "Navegación en catamarán de lujo con snorkel y barra libre",
+      "description": "Navega por las aguas turquesas del santuario marino. Avistamiento de fauna marina en su hábitat natural, snorkel guiado en arrecife de coral vivo y cócteles al atardecer.",
+      "destination": "Bahía Esmeralda & Islas de Coral",
+      "category": "Naturaleza",
+      "price": 110,
+      "childPrice": 70,
+      "duration": "5 Horas",
+      "difficulty": "Fácil",
+      "maxCapacity": 20,
+      "meetingPoint": {
+        "name": "Marina Real - Muelle Turístico Puerta 4",
+        "address": "Malecón Costero 1020, Bahía Azul",
+        "googleMapsUrl": "https://maps.google.com/?q=-12.046374,-77.042793",
+        "pickupAvailable": true
+      },
+      "timeSlots": [
+        "08:30 AM",
+        "02:00 PM"
+      ],
+      "included": [
+        "Paseo en catamarán de lujo de 45 pies",
+        "Biólogo marino a bordo y guía en varios idiomas",
+        "Equipo completo de snorkel (máscara, aletas y chaleco)",
+        "Barra libre nacional de cócteles y bebidas frías",
+        "Tabla de quesos, ceviche fresco y frutas",
+        "Tasa de ingreso al parque marino"
+      ],
+      "notIncluded": [
+        "Toallas de playa personales",
+        "Propinas"
+      ],
+      "itinerary": [
+        {
+          "time": "08:30 AM",
+          "title": "Zarpada y Bienvenida",
+          "desc": "Cóctel de cortesía y charla de seguridad marina."
+        },
+        {
+          "time": "09:30 AM",
+          "title": "Zona de Avistamiento de Cetáceos",
+          "desc": "Búsqueda guiada con hidrófono para escuchar cantos marinos."
+        },
+        {
+          "time": "11:00 AM",
+          "title": "Snorkel en Arrecife Protegido",
+          "desc": "Inmersión entre peces multicolores y tortugas marinas."
+        },
+        {
+          "time": "12:30 PM",
+          "title": "Degustación Gastronómica Marina",
+          "desc": "Ceviche preparado al momento con vista al horizonte."
+        },
+        {
+          "time": "01:30 PM",
+          "title": "Regreso al Muelle",
+          "desc": "Fin de la navegación."
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1544552866-d3ed42536cfd?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "rating": 4.98,
+      "reviewsCount": 489,
+      "featured": true,
+      "requiresOperatorApproval": false
+    },
+    {
+      "id": "tour-3",
+      "title": "Ruta Culinaria Nocturna & Cata de Vinos y Destilados",
+      "tagline": "7 paradas gastronómicas secretas, maridaje y música en vivo",
+      "description": "Un viaje sensorial por la gastronomía local más galardonada. Recorre tabernas históricas, mercados nocturnos y rooftops exclusivos guiado por un chef sommelier.",
+      "destination": "Centro Histórico & Distrito Gourmet",
+      "category": "Gastronomía",
+      "price": 95,
+      "childPrice": 50,
+      "duration": "4 Horas",
+      "difficulty": "Fácil",
+      "maxCapacity": 10,
+      "meetingPoint": {
+        "name": "Plaza Mayor - Frente a la Fuente Histórica",
+        "address": "Plaza de Armas Central, Casco Antiguo",
+        "googleMapsUrl": "https://maps.google.com/?q=-12.046374,-77.042793",
+        "pickupAvailable": false
+      },
+      "timeSlots": [
+        "05:30 PM",
+        "07:30 PM"
+      ],
+      "included": [
+        "Chef anfitrión y guía sommelier privado",
+        "Degustación de 8 platillos insignia en restaurantes premiados",
+        "Maridaje con 4 copas de vinos selectos y cata de destilado local",
+        "Acceso VIP sin filas a todos los locales",
+        "Recetario digital exclusivo al terminar el tour"
+      ],
+      "notIncluded": [
+        "Platos a la carta adicionales",
+        "Transporte al punto de encuentro"
+      ],
+      "itinerary": [
+        {
+          "time": "05:30 PM",
+          "title": "Punto de Encuentro y Brindis Inicial",
+          "desc": "Bienvenida con cóctel de autor en taberna de 1920."
+        },
+        {
+          "time": "06:15 PM",
+          "title": "Ruta de Tapas y Cocina Tradicional",
+          "desc": "Visita a 3 locales tradicionales con preparación en directo."
+        },
+        {
+          "time": "07:45 PM",
+          "title": "Cata a Ciegas con Sommelier",
+          "desc": "Maridaje y aprendizaje sensorial."
+        },
+        {
+          "time": "09:00 PM",
+          "title": "Postre de Vanguardia en Rooftop",
+          "desc": "Cierre con vista panorámica iluminada de la ciudad."
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "rating": 4.92,
+      "reviewsCount": 215,
+      "featured": true,
+      "requiresOperatorApproval": false
+    },
+    {
+      "id": "tour-4",
+      "title": "Senderismo al Pico del Sol & Observación Astronómica",
+      "tagline": "Caminata crepuscular, fogata mística y telescopio profesional",
+      "description": "Asciende por encima del mar de nubes para presenciar una puesta de sol inolvidable, seguida de una sesión astronómica guiada con telescopio para ver planetas y constelaciones.",
+      "destination": "Mirador Cerro Nevado",
+      "category": "Cultural",
+      "price": 75,
+      "childPrice": 45,
+      "duration": "6 Horas",
+      "difficulty": "Moderado",
+      "maxCapacity": 12,
+      "meetingPoint": {
+        "name": "Estación Base Mirador de las Estrellas",
+        "address": "Camino a las Cumbres 400",
+        "googleMapsUrl": "https://maps.google.com/?q=-13.163141,-72.544963",
+        "pickupAvailable": true
+      },
+      "timeSlots": [
+        "03:30 PM"
+      ],
+      "included": [
+        "Transporte de montaña 4x4",
+        "Guía astronómico y equipo de telescopio motorizado",
+        "Bebidas calientes (chocolate artesanal, vino especiado)",
+        "Bastones de trekking y linternas frontales rojas"
+      ],
+      "notIncluded": [
+        "Ropa de abrigo extrema (abrigos térmicos en alquiler)"
+      ],
+      "itinerary": [
+        {
+          "time": "03:30 PM",
+          "title": "Subida hacia el Refugio",
+          "desc": "Ascenso en vehículo panorámico."
+        },
+        {
+          "time": "05:15 PM",
+          "title": "Puesta de Sol Dorada",
+          "desc": "Fotografía sobre el mar de nubes."
+        },
+        {
+          "time": "06:30 PM",
+          "title": "Fogata & Charla Arqueoastronómica",
+          "desc": "Historias ancestrales sobre las estrellas."
+        },
+        {
+          "time": "07:30 PM",
+          "title": "Observación de Espacio Profundo",
+          "desc": "Visualización de nebulosas y anillos de Saturno."
+        },
+        {
+          "time": "09:30 PM",
+          "title": "Regreso",
+          "desc": "Llegada al punto de origen."
+        }
+      ],
+      "images": [
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "rating": 4.89,
+      "reviewsCount": 178,
+      "featured": false,
+      "requiresOperatorApproval": true
+    }
+  ],
+  "bookings": [
+    {
+      "id": "bkg-1788393694145-fovg2",
+      "code": "TOUR-2026-1528",
+      "tourId": "tour-1",
+      "tourTitle": "Expedición a la Selva Mágica & Cascadas Secretas",
+      "tourImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+      "date": "2026-09-04",
+      "timeSlot": "07:30 AM",
+      "adultsCount": 2,
+      "childrenCount": 0,
+      "totalPassengers": 2,
+      "leadCustomer": {
+        "fullName": "Carlos Mendoza (Cliente)",
+        "email": "euryhealer@gmail.com",
+        "phone": "+50767546550",
+        "country": "Panamá",
+        "notes": "Sin restricciones. Salida de prueba en modo test/sandbox."
+      },
+      "passengers": [
+        {
+          "fullName": "Carlos Mendoza",
+          "documentType": "DNI",
+          "documentNumber": "45918290",
+          "ageType": "adult",
+          "specialRequirements": "Ninguna"
+        },
+        {
+          "fullName": "Acompañante #2",
+          "documentType": "DNI",
+          "documentNumber": "45918291",
+          "ageType": "adult",
+          "specialRequirements": "Ninguna"
+        }
+      ],
+      "selectedAddOns": [
+        {
+          "id": "addon-photo",
+          "name": "📸 Paquete de Fotografía 4K & Drone",
+          "description": "Sesión de fotos y video en alta definición durante las mejores paradas del tour.",
+          "price": 30
+        },
+        {
+          "id": "addon-pickup",
+          "name": "🚐 Recogida Privada en Hotel (Ida y Vuelta)",
+          "description": "Transporte exclusivo puerta a puerta sin paradas intermedias.",
+          "price": 25
+        }
+      ],
+      "subtotal": 225,
+      "discountAmount": 0,
+      "tax": 22.5,
+      "totalAmount": 247.5,
+      "currency": "USD",
+      "status": "confirmed",
+      "paymentMethod": "credit_card",
+      "paymentStatus": "pending",
+      "language": "es",
+      "paymentDetails": {
+        "cardLast4": "8829",
+        "cardBrand": "Visa"
+      },
+      "assignedOperatorId": "op-1",
+      "assignedOperatorName": "Carlos Mendoza",
+      "operatorConfirmed": true,
+      "createdAt": "2026-09-03T00:01:34.145Z",
+      "updatedAt": "2026-09-03T00:01:51.350Z",
+      "qrCodeUrl": "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TOUR_BOARDING_PASS%3ATOUR-2026-1528",
+      "operatorConfirmedAt": "19:01"
+    },
+    {
+      "id": "bkg-1788391908576-v9jfb",
+      "code": "TOUR-2026-6100",
+      "tourId": "tour-2",
+      "tourTitle": "Safari Marino: Ballenas, Delfines & Arrecifes de Coral",
+      "tourImage": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+      "date": "2026-09-03",
+      "timeSlot": "08:30 AM",
+      "adultsCount": 2,
+      "childrenCount": 0,
+      "totalPassengers": 2,
+      "leadCustomer": {
+        "fullName": "Carlos Mendoza (Cliente)",
+        "email": "euryhealer@gmail.com",
+        "phone": "+50767546550",
+        "country": "Panamá",
+        "notes": "Sin restricciones. Salida de prueba en modo test/sandbox."
+      },
+      "passengers": [
+        {
+          "fullName": "Carlos Mendoza",
+          "documentType": "DNI",
+          "documentNumber": "45918290",
+          "ageType": "adult",
+          "specialRequirements": "Ninguna"
+        },
+        {
+          "fullName": "Acompañante #2",
+          "documentType": "DNI",
+          "documentNumber": "45918291",
+          "ageType": "adult",
+          "specialRequirements": "Ninguna"
+        }
+      ],
+      "selectedAddOns": [
+        {
+          "id": "addon-photo",
+          "name": "📸 Paquete de Fotografía 4K & Drone",
+          "description": "Sesión de fotos y video en alta definición durante las mejores paradas del tour.",
+          "price": 30
+        },
+        {
+          "id": "addon-pickup",
+          "name": "🚐 Recogida Privada en Hotel (Ida y Vuelta)",
+          "description": "Transporte exclusivo puerta a puerta sin paradas intermedias.",
+          "price": 25
+        },
+        {
+          "id": "addon-lunch",
+          "name": "🍷 Menú Degustación Premium & Maridaje",
+          "description": "Upgrade a almuerzo de 4 tiempos con copa de vino y postre artesanal.",
+          "price": 20
+        }
+      ],
+      "subtotal": 295,
+      "discountAmount": 0,
+      "tax": 29.5,
+      "totalAmount": 324.5,
+      "currency": "USD",
+      "status": "confirmed",
+      "paymentMethod": "credit_card",
+      "paymentStatus": "completed",
+      "language": "es",
+      "paymentDetails": {
+        "transactionId": "TXN-X8L3M0A",
+        "cardLast4": "4242",
+        "cardBrand": "Visa Sandbox Test",
+        "paidAt": "2026-09-02T23:31:48.576Z"
+      },
+      "assignedOperatorId": "op-1",
+      "assignedOperatorName": "Carlos Mendoza",
+      "operatorConfirmed": true,
+      "invoiceNumber": "FACT-2026-6100",
+      "invoiceIssuedAt": "2026-09-02T23:31:48.576Z",
+      "createdAt": "2026-09-02T23:31:48.576Z",
+      "updatedAt": "2026-09-03T17:29:22.938Z",
+      "qrCodeUrl": "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TOUR_BOARDING_PASS%3ATOUR-2026-6100",
+      "operatorConfirmedAt": "12:29"
+    }
+  ],
+  "operators": [
+    {
+      "id": "op-1",
+      "name": "Carlos Mendoza",
+      "email": "carlos.mendoza@terraaventura.com",
+      "phone": "+50765274580",
+      "role": "Guía Principal",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "languages": [
+        "Español",
+        "Inglés",
+        "Portugués"
+      ],
+      "active": true
+    },
+    {
+      "id": "op-2",
+      "name": "Valeria Quispe",
+      "email": "valeria.quispe@terraaventura.com",
+      "phone": "+50765274580",
+      "role": "Coordinador de Ruta",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
+      "languages": [
+        "Español",
+        "Inglés",
+        "Francés"
+      ],
+      "active": true
+    },
+    {
+      "id": "op-3",
+      "name": "Mateo Sandoval",
+      "email": "mateo.sandoval@terraaventura.com",
+      "phone": "+50765274580",
+      "role": "Conductor Especializado",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      "languages": [
+        "Español",
+        "Inglés básico"
+      ],
+      "active": true
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-email-accepted-1788456565007",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "email",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "euryhealer@gmail.com (CC: eury87@gmail.com)",
+      "title": "Guía Confirmó Salida #TOUR-2026-6100",
+      "message": "Correo enviado al cliente habilitando pago seguro con copia a eury87@gmail.com.",
+      "status": "sent",
+      "timestamp": "2026-09-03T17:29:25.007Z"
+    },
+    {
+      "id": "notif-email-accepted-1788393712473",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "email",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "euryhealer@gmail.com (CC: eury87@gmail.com)",
+      "title": "Guía Confirmó Salida #TOUR-2026-1528",
+      "message": "Correo enviado al cliente habilitando pago seguro con copia a eury87@gmail.com.",
+      "status": "sent",
+      "timestamp": "2026-09-03T00:01:52.473Z"
+    },
+    {
+      "id": "notif-wa-op-1788393698958",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "whatsapp",
+      "recipientRole": "operator",
+      "recipientName": "Carlos Mendoza",
+      "recipientContact": "+50765274580",
+      "title": "WhatsApp al Operario (Carlos Mendoza)",
+      "message": "🚨 *NUEVA ASIGNACIÓN DE TOUR - TERRAAVENTURA EXPEDITIONS & LUXURY TOURS* 🚨\n\nHola *Carlos Mendoza*, se te ha asignado el siguiente grupo:\n\n🎟️ *Reserva:* TOUR-2026-1528\n🗺️ *Tour:* Expedición a la Selva Mágica & Cascadas Secretas\n📅 *Fecha:* 2026-09-04 | ⏰ *Hora:* 07:30 AM\n👥 *Total Pasajeros:* 2\n👤 *Cliente Líder:* Carlos Mendoza (Cliente)\n📞 *Teléfono Cliente:* +50767546550\n📍 *Punto:* Base Aventura TerraAventura - Módulo 3\n\n⏳ *Modalidad:* Requiere aprobación previa del guía (el cliente esperará tu confirmación para procesar el pago).\n\n📝 *Requerimientos Especiales:*\n- Carlos Mendoza: Ninguna\n- Acompañante #2: Ninguna\n\n✍️ *Para ACEPTAR el turno:* Escribe el número *1* y dale a Enviar en este chat.\n✍️ *Para DECLINAR el turno:* Escribe el número *2* y dale a Enviar en este chat.",
+      "status": "delivered",
+      "timestamp": "2026-09-03T00:01:38.958Z",
+      "whatsappLink": "https://wa.me/50765274580?text=%F0%9F%9A%A8%20*NUEVA%20ASIGNACI%C3%93N%20DE%20TOUR%20-%20TERRAAVENTURA%20EXPEDITIONS%20%26%20LUXURY%20TOURS*%20%F0%9F%9A%A8%0A%0AHola%20*Carlos%20Mendoza*%2C%20se%20te%20ha%20asignado%20el%20siguiente%20grupo%3A%0A%0A%F0%9F%8E%9F%EF%B8%8F%20*Reserva%3A*%20TOUR-2026-1528%0A%F0%9F%97%BA%EF%B8%8F%20*Tour%3A*%20Expedici%C3%B3n%20a%20la%20Selva%20M%C3%A1gica%20%26%20Cascadas%20Secretas%0A%F0%9F%93%85%20*Fecha%3A*%202026-09-04%20%7C%20%E2%8F%B0%20*Hora%3A*%2007%3A30%20AM%0A%F0%9F%91%A5%20*Total%20Pasajeros%3A*%202%0A%F0%9F%91%A4%20*Cliente%20L%C3%ADder%3A*%20Carlos%20Mendoza%20(Cliente)%0A%F0%9F%93%9E%20*Tel%C3%A9fono%20Cliente%3A*%20%2B50767546550%0A%F0%9F%93%8D%20*Punto%3A*%20Base%20Aventura%20TerraAventura%20-%20M%C3%B3dulo%203%0A%0A%E2%8F%B3%20*Modalidad%3A*%20Requiere%20aprobaci%C3%B3n%20previa%20del%20gu%C3%ADa%20(el%20cliente%20esperar%C3%A1%20tu%20confirmaci%C3%B3n%20para%20procesar%20el%20pago).%0A%0A%F0%9F%93%9D%20*Requerimientos%20Especiales%3A*%0A-%20Carlos%20Mendoza%3A%20Ninguna%0A-%20Acompa%C3%B1ante%20%232%3A%20Ninguna%0A%0A%E2%9C%8D%EF%B8%8F%20*Para%20ACEPTAR%20el%20turno%3A*%20Escribe%20el%20n%C3%BAmero%20*1*%20y%20dale%20a%20Enviar%20en%20este%20chat.%0A%E2%9C%8D%EF%B8%8F%20*Para%20DECLINAR%20el%20turno%3A*%20Escribe%20el%20n%C3%BAmero%20*2*%20y%20dale%20a%20Enviar%20en%20este%20chat."
+    },
+    {
+      "id": "notif-wa-cust-1788393698738",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "whatsapp",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "+50767546550",
+      "title": "WhatsApp de Confirmación #TOUR-2026-1528",
+      "message": "📋 *¡SOLICITUD DE RESERVA RECIBIDA (0% COBRADO)!* - TERRAAVENTURA EXPEDITIONS & LUXURY TOURS\n\nHola *Carlos Mendoza (Cliente)*, hemos recibido tu solicitud de reserva para *Expedición a la Selva Mágica & Cascadas Secretas* (TOUR-2026-1528) para el 2026-09-04 a las 07:30 AM.\n\n⏳ *Estado: En espera de confirmación de tu guía oficial (Carlos Mendoza).*\n🛡️ *No se ha realizado ningún cobro.*\n\nEn cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio el enlace para procesar tu pago seguro y emitir tu Factura Comercial Oficial y Pase Digital QR.",
+      "status": "delivered",
+      "timestamp": "2026-09-03T00:01:38.738Z",
+      "whatsappLink": "https://wa.me/50767546550?text=%F0%9F%93%8B%20*%C2%A1SOLICITUD%20DE%20RESERVA%20RECIBIDA%20(0%25%20COBRADO)!*%20-%20TERRAAVENTURA%20EXPEDITIONS%20%26%20LUXURY%20TOURS%0A%0AHola%20*Carlos%20Mendoza%20(Cliente)*%2C%20hemos%20recibido%20tu%20solicitud%20de%20reserva%20para%20*Expedici%C3%B3n%20a%20la%20Selva%20M%C3%A1gica%20%26%20Cascadas%20Secretas*%20(TOUR-2026-1528)%20para%20el%202026-09-04%20a%20las%2007%3A30%20AM.%0A%0A%E2%8F%B3%20*Estado%3A%20En%20espera%20de%20confirmaci%C3%B3n%20de%20tu%20gu%C3%ADa%20oficial%20(Carlos%20Mendoza).*%0A%F0%9F%9B%A1%EF%B8%8F%20*No%20se%20ha%20realizado%20ning%C3%BAn%20cobro.*%0A%0AEn%20cuanto%20tu%20gu%C3%ADa%20confirme%20disponibilidad%2C%20te%20enviaremos%20por%20este%20mismo%20medio%20el%20enlace%20para%20procesar%20tu%20pago%20seguro%20y%20emitir%20tu%20Factura%20Comercial%20Oficial%20y%20Pase%20Digital%20QR."
+    },
+    {
+      "id": "notif-email-op-1788393698488",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "email",
+      "recipientRole": "operator",
+      "recipientName": "Carlos Mendoza",
+      "recipientContact": "carlos.mendoza@terraaventura.com",
+      "title": "Orden de Operación #TOUR-2026-1528",
+      "message": "Lista de pasajeros y datos de ruta enviados al guía.",
+      "status": "sent",
+      "timestamp": "2026-09-03T00:01:38.488Z"
+    },
+    {
+      "id": "notif-email-owner-1788393697488",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "email",
+      "recipientRole": "owner",
+      "recipientName": "Administración",
+      "recipientContact": "eury87@gmail.com",
+      "title": "Alerta de Venta #TOUR-2026-1528",
+      "message": "Ingreso de reserva por $247.50 USD",
+      "status": "sent",
+      "timestamp": "2026-09-03T00:01:37.488Z"
+    },
+    {
+      "id": "notif-email-cust-1788393696537",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "email",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "euryhealer@gmail.com (CC: eury87@gmail.com)",
+      "title": "Solicitud Recibida #TOUR-2026-1528",
+      "message": "Correo enviado al cliente con copia de auditoría a eury87@gmail.com.",
+      "status": "sent",
+      "timestamp": "2026-09-03T00:01:36.537Z"
+    },
+    {
+      "id": "notif-inapp-1788393694146",
+      "bookingId": "bkg-1788393694145-fovg2",
+      "bookingCode": "TOUR-2026-1528",
+      "channel": "in_app",
+      "recipientRole": "owner",
+      "recipientName": "Panel de Administración & Operadores",
+      "recipientContact": "In-App WebSockets",
+      "title": "¡Nueva Reserva Registrada!",
+      "message": "Carlos Mendoza (Cliente) ha reservado 2 cupo(s) para \"Expedición a la Selva Mágica & Cascadas Secretas\" (TOUR-2026-1528)",
+      "status": "delivered",
+      "timestamp": "2026-09-03T00:01:34.146Z"
+    },
+    {
+      "id": "notif-wa-op-1788391916516",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "whatsapp",
+      "recipientRole": "operator",
+      "recipientName": "Carlos Mendoza",
+      "recipientContact": "+50765274580",
+      "title": "WhatsApp al Operario (Carlos Mendoza)",
+      "message": "🚨 *NUEVA ASIGNACIÓN DE TOUR - TERRAAVENTURA EXPEDITIONS & LUXURY TOURS* 🚨\n\nHola *Carlos Mendoza*, se te ha asignado el siguiente grupo:\n\n🎟️ *Reserva:* TOUR-2026-6100\n🗺️ *Tour:* Safari Marino: Ballenas, Delfines & Arrecifes de Coral\n📅 *Fecha:* 2026-09-03 | ⏰ *Hora:* 08:30 AM\n👥 *Total Pasajeros:* 2\n👤 *Cliente Líder:* Carlos Mendoza (Cliente)\n📞 *Teléfono Cliente:* +50767546550\n📍 *Punto:* Marina Real - Muelle Turístico Puerta 4\n\n⚡ *Modalidad:* Confirmación y pago directo.\n\n📝 *Requerimientos Especiales:*\n- Carlos Mendoza: Ninguna\n- Acompañante #2: Ninguna\n\n✍️ *Para ACEPTAR el turno:* Escribe el número *1* y dale a Enviar en este chat.\n✍️ *Para DECLINAR el turno:* Escribe el número *2* y dale a Enviar en este chat.",
+      "status": "delivered",
+      "timestamp": "2026-09-02T23:31:56.516Z",
+      "whatsappLink": "https://wa.me/50765274580?text=%F0%9F%9A%A8%20*NUEVA%20ASIGNACI%C3%93N%20DE%20TOUR%20-%20TERRAAVENTURA%20EXPEDITIONS%20%26%20LUXURY%20TOURS*%20%F0%9F%9A%A8%0A%0AHola%20*Carlos%20Mendoza*%2C%20se%20te%20ha%20asignado%20el%20siguiente%20grupo%3A%0A%0A%F0%9F%8E%9F%EF%B8%8F%20*Reserva%3A*%20TOUR-2026-6100%0A%F0%9F%97%BA%EF%B8%8F%20*Tour%3A*%20Safari%20Marino%3A%20Ballenas%2C%20Delfines%20%26%20Arrecifes%20de%20Coral%0A%F0%9F%93%85%20*Fecha%3A*%202026-09-03%20%7C%20%E2%8F%B0%20*Hora%3A*%2008%3A30%20AM%0A%F0%9F%91%A5%20*Total%20Pasajeros%3A*%202%0A%F0%9F%91%A4%20*Cliente%20L%C3%ADder%3A*%20Carlos%20Mendoza%20(Cliente)%0A%F0%9F%93%9E%20*Tel%C3%A9fono%20Cliente%3A*%20%2B50767546550%0A%F0%9F%93%8D%20*Punto%3A*%20Marina%20Real%20-%20Muelle%20Tur%C3%ADstico%20Puerta%204%0A%0A%E2%9A%A1%20*Modalidad%3A*%20Confirmaci%C3%B3n%20y%20pago%20directo.%0A%0A%F0%9F%93%9D%20*Requerimientos%20Especiales%3A*%0A-%20Carlos%20Mendoza%3A%20Ninguna%0A-%20Acompa%C3%B1ante%20%232%3A%20Ninguna%0A%0A%E2%9C%8D%EF%B8%8F%20*Para%20ACEPTAR%20el%20turno%3A*%20Escribe%20el%20n%C3%BAmero%20*1*%20y%20dale%20a%20Enviar%20en%20este%20chat.%0A%E2%9C%8D%EF%B8%8F%20*Para%20DECLINAR%20el%20turno%3A*%20Escribe%20el%20n%C3%BAmero%20*2*%20y%20dale%20a%20Enviar%20en%20este%20chat."
+    },
+    {
+      "id": "notif-wa-cust-1788391916235",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "whatsapp",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "+50767546550",
+      "title": "WhatsApp de Confirmación #TOUR-2026-6100",
+      "message": "🌴 *¡RESERVA CONFIRMADA - TERRAAVENTURA EXPEDITIONS & LUXURY TOURS!* 🌴\n\nHola *Carlos Mendoza (Cliente)*, tu aventura ha sido confirmada con éxito.\n\n🎟️ *Código de Reserva:* TOUR-2026-6100\n🧾 *Factura Electrónica:* FACT-2026-6100\n🗺️ *Tour:* Safari Marino: Ballenas, Delfines & Arrecifes de Coral\n📅 *Fecha:* 2026-09-03\n⏰ *Hora:* 08:30 AM\n👥 *Pasajeros:* 2 (2 Adultos)\n📍 *Punto de Encuentro:* Marina Real - Muelle Turístico Puerta 4\n📌 *Ubicación Maps:* https://maps.google.com/?q=-12.046374,-77.042793\n\n👤 *Tu Guía Asignado:* Carlos Mendoza (+50765274580)\n\n💰 *Total Facturado:* $324.50 USD (✅ Pagado)\n\n📲 *Tu Pase Digital (QR) y Factura:*\nMuestra tu código *TOUR-2026-6100* o tu voucher al llegar al punto de encuentro.\n\n¡Nos vemos pronto para vivir esta experiencia única!",
+      "status": "delivered",
+      "timestamp": "2026-09-02T23:31:56.235Z",
+      "whatsappLink": "https://wa.me/50767546550?text=%F0%9F%8C%B4%20*%C2%A1RESERVA%20CONFIRMADA%20-%20TERRAAVENTURA%20EXPEDITIONS%20%26%20LUXURY%20TOURS!*%20%F0%9F%8C%B4%0A%0AHola%20*Carlos%20Mendoza%20(Cliente)*%2C%20tu%20aventura%20ha%20sido%20confirmada%20con%20%C3%A9xito.%0A%0A%F0%9F%8E%9F%EF%B8%8F%20*C%C3%B3digo%20de%20Reserva%3A*%20TOUR-2026-6100%0A%F0%9F%A7%BE%20*Factura%20Electr%C3%B3nica%3A*%20FACT-2026-6100%0A%F0%9F%97%BA%EF%B8%8F%20*Tour%3A*%20Safari%20Marino%3A%20Ballenas%2C%20Delfines%20%26%20Arrecifes%20de%20Coral%0A%F0%9F%93%85%20*Fecha%3A*%202026-09-03%0A%E2%8F%B0%20*Hora%3A*%2008%3A30%20AM%0A%F0%9F%91%A5%20*Pasajeros%3A*%202%20(2%20Adultos)%0A%F0%9F%93%8D%20*Punto%20de%20Encuentro%3A*%20Marina%20Real%20-%20Muelle%20Tur%C3%ADstico%20Puerta%204%0A%F0%9F%93%8C%20*Ubicaci%C3%B3n%20Maps%3A*%20https%3A%2F%2Fmaps.google.com%2F%3Fq%3D-12.046374%2C-77.042793%0A%0A%F0%9F%91%A4%20*Tu%20Gu%C3%ADa%20Asignado%3A*%20Carlos%20Mendoza%20(%2B50765274580)%0A%0A%F0%9F%92%B0%20*Total%20Facturado%3A*%20%24324.50%20USD%20(%E2%9C%85%20Pagado)%0A%0A%F0%9F%93%B2%20*Tu%20Pase%20Digital%20(QR)%20y%20Factura%3A*%0AMuestra%20tu%20c%C3%B3digo%20*TOUR-2026-6100*%20o%20tu%20voucher%20al%20llegar%20al%20punto%20de%20encuentro.%0A%0A%C2%A1Nos%20vemos%20pronto%20para%20vivir%20esta%20experiencia%20%C3%BAnica!"
+    },
+    {
+      "id": "notif-email-op-1788391912069",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "email",
+      "recipientRole": "operator",
+      "recipientName": "Carlos Mendoza",
+      "recipientContact": "carlos.mendoza@terraaventura.com",
+      "title": "Orden de Operación #TOUR-2026-6100",
+      "message": "Lista de pasajeros y datos de ruta enviados al guía.",
+      "status": "sent",
+      "timestamp": "2026-09-02T23:31:52.069Z"
+    },
+    {
+      "id": "notif-email-owner-1788391911083",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "email",
+      "recipientRole": "owner",
+      "recipientName": "Administración",
+      "recipientContact": "eury87@gmail.com",
+      "title": "Alerta de Venta #TOUR-2026-6100",
+      "message": "Ingreso de reserva por $324.50 USD",
+      "status": "sent",
+      "timestamp": "2026-09-02T23:31:51.083Z"
+    },
+    {
+      "id": "notif-email-cust-1788391910142",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "email",
+      "recipientRole": "customer",
+      "recipientName": "Carlos Mendoza (Cliente)",
+      "recipientContact": "euryhealer@gmail.com (CC: eury87@gmail.com)",
+      "title": "Factura y Reserva Confirmada #TOUR-2026-6100",
+      "message": "Correo enviado al cliente con copia de auditoría a eury87@gmail.com.",
+      "status": "sent",
+      "timestamp": "2026-09-02T23:31:50.142Z"
+    },
+    {
+      "id": "notif-inapp-1788391908577",
+      "bookingId": "bkg-1788391908576-v9jfb",
+      "bookingCode": "TOUR-2026-6100",
+      "channel": "in_app",
+      "recipientRole": "owner",
+      "recipientName": "Panel de Administración & Operadores",
+      "recipientContact": "In-App WebSockets",
+      "title": "¡Nueva Reserva Registrada!",
+      "message": "Carlos Mendoza (Cliente) ha reservado 2 cupo(s) para \"Safari Marino: Ballenas, Delfines & Arrecifes de Coral\" (TOUR-2026-6100)",
+      "status": "delivered",
+      "timestamp": "2026-09-02T23:31:48.577Z"
+    }
+  ],
+  "settings": {
+    "businessName": "TerraAventura Expeditions & Luxury Tours",
+    "businessEmail": "eury87@gmail.com",
+    "businessPhone": "+1 (555) 349-2810",
+    "businessAddress": "Av. Gran V�a 240, Distrito Tur�stico Central",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "taxRate": 0.1,
+    "notificationChannels": {
+      "emailOwner": true,
+      "emailOperator": true,
+      "emailCustomer": true,
+      "whatsappCustomer": true,
+      "whatsappOperator": true,
+      "inAppSoundAlerts": true
+    },
+    "smtpConfig": {
+      "host": "smtp.resend.com",
+      "port": 465,
+      "user": "resend",
+      "pass": "re_sample_smtp_pass",
+      "from": "\"TerraAventura Tours\" <reservas@test.rodeotest.shop>",
+      "isSimulated": false
+    },
+    "whatsappConfig": {
+      "apiUrl": "https://graph.facebook.com/v19.0/PHONE_NUMBER_ID/messages",
+      "apiKey": "WA_TOKEN_PROD_SAMPLE",
+      "senderPhone": "+15553492810",
+      "isSimulated": true
+    },
+    "platformAuditEmail": "eury87@gmail.com"
+  }
+}

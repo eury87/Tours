@@ -1,0 +1,34 @@
+# Dependencias de Node
+node_modules/
+client/node_modules/
+.pnpm-store/
+
+# Variables de entorno y secretos (NUNCA SUBIR A GITHUB)
+.env
+.env.local
+.env.production
+.env*.local
+
+# Compilación y producción
+client/dist/
+dist/
+build/
+
+# Ejecutables auxiliares
+cloudflared.exe
+*.exe
+
+# Logs y depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+.system_generated/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Sesiones locales de WhatsApp (si las hubiera)
+data/whatsapp_session/
+uploads/

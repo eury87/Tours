@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-950: #10110e;
+  --color-slate-900: #171916;
+  --color-slate-800: #222420;
+  --color-slate-700: #30332c;
+  --color-slate-600: #494d44;
+  --color-slate-500: #6a7063;
+  --color-slate-400: #9da395;
+  --color-slate-300: #c4c8be;
+  --color-slate-200: #e2e5dd;
+  --color-slate-100: #f2f4ee;
+}
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    background-color: #141513;
+    color: #f1f5f9;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .font-serif, .font-editorial {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* Tokens de Estilo Monterey Sky & Magnolia (WH52 / BU90 / GY82) */
+.btn-mint, .btn-magnolia {
+  background-color: #E8E1D1;
+  color: #152230;
+  font-weight: 800;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-mint:hover, .btn-magnolia:hover {
+  background-color: #F8F5EE;
+  color: #0d1722;
+  box-shadow: 0 10px 25px -5px rgba(232, 225, 209, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-monterey {
+  background-color: #34506D;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: 1px solid rgba(232, 225, 209, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-monterey:hover {
+  background-color: #3E5F82;
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(52, 80, 109, 0.4);
+  transform: translateY(-1px);
+}
+
+.wanderlust-glass {
+  background: rgba(28, 30, 28, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(178, 174, 162, 0.18);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Glassmorphism Styles - Koala Base */
+.glass-panel {
+  background: rgba(22, 24, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(178, 174, 162, 0.14);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(30, 32, 30, 0.9) 0%, rgba(22, 24, 22, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(178, 174, 162, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(232, 225, 209, 0.45);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(232, 225, 209, 0.15);
+  transform: translateY(-4px);
+}
+
+.glow-emerald, .glow-magnolia {
+  box-shadow: 0 0 30px -5px rgba(232, 225, 209, 0.35);
+}
+
+.glow-amber {
+  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+}
+
+/* Background Luxury Mesh Orbs - Koala Base & Monterey Sky */
+.luxury-bg-mesh {
+  background-color: #141513;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(178, 174, 162, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(52, 80, 109, 0.06) 0px, transparent 50%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #141513;
+}
+::-webkit-scrollbar-thumb {
+  background: #232521;
+  border-radius: 9999px;
+  border: 2px solid #141513;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E8E1D1;
+}
+
+/* Print styles for digital boarding passes */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-ticket-area, .print-ticket-area * {
+    visibility: visible;
+  }
+  .print-ticket-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes heroReveal {
+  0% {
+    transform: scale(1.18);
+    opacity: 0.2;
+    filter: blur(10px) brightness(0.6);
+  }
+  40% {
+    filter: blur(3px) brightness(0.85);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes heroContentIn {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cardBurst {
+  0% {
+    transform: scale(0.92) translateY(0);
+    box-shadow: 0 0 0 0 rgba(232, 225, 209, 0.8);
+  }
+  50% {
+    transform: scale(1.14) translateY(-8px);
+    box-shadow: 0 0 35px 12px rgba(232, 225, 209, 0.5);
+  }
+  100% {
+    transform: scale(1.06) translateY(-4px);
+    box-shadow: 0 12px 30px rgba(232, 225, 209, 0.3);
+  }
+}
+
+.animate-hero-reveal {
+  animation: heroReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-hero-content {
+  animation: heroContentIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-card-burst {
+  animation: cardBurst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.4) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 3s infinite;
+  content: '';
+}
