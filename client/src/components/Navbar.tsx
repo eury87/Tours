@@ -97,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             <span>{t('navTours')}</span>
           </button>
 
-          {(activeRole === 'superadmin' || activeRole === 'company_admin') && (
+          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent') && (
             <button
               onClick={() => onViewChange('admin')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             </button>
           )}
 
-          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'operator') && (
+          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent' || activeRole === 'operator') && (
             <button
               onClick={() => onViewChange('manifest')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -125,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             </button>
           )}
 
-          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'operator') && (
+          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent' || activeRole === 'operator') && (
             <button
               onClick={() => onViewChange('scanner')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -153,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             </button>
           )}
 
-          {(activeRole === 'superadmin' || activeRole === 'company_admin') && (
+          {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent') && (
             <button
               onClick={() => onViewChange('settings')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -263,7 +263,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
                 </div>
 
                 <div className="pt-2 space-y-1">
-                  {(currentUser.role === 'company_admin' || currentUser.role === 'superadmin') && (
+                  {(currentUser.role === 'company_admin' || currentUser.role === 'superadmin' || currentUser.role === 'agent') && (
                     <button
                       onClick={() => { onViewChange('admin'); setShowUserDropdown(false); }}
                       className="w-full text-left px-3 py-2 rounded-xl text-xs text-stone-200 hover:text-white hover:bg-white/10 font-semibold transition-colors flex items-center gap-2"

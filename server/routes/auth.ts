@@ -65,22 +65,23 @@ router.post('/google', (req: Request, res: Response) => {
     }
 
     let user = db.getUserByEmail(email);
-    const settings = db.getSettings();
-    const isOwnerEmail = email.toLowerCase() === settings.businessEmail?.toLowerCase() || 
-                         email.toLowerCase().includes('eury') ||
-                         email.toLowerCase() === 'owner@terraaventura.com';
 
     if (!user) {
-      // Si el email coincide con el dueño o es un agente autorizado, crearlo
       user = {
         id: `usr-g-${sub || Date.now()}`,
-        name: name || 'Usuario Google',
+        name: name || 'Agente / Propietario',
         email: email,
-        role: isOwnerEmail ? 'company_admin' : 'agent',
+        role: 'company_admin', // Administrador / Dueño de agencia
         companyId: 'comp-1',
         avatar: picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
       };
       db.createUser(user);
+    } else {
+      // Si el usuario ya existía pero con rol agente/cliente, asegurar que tenga acceso de administrador
+      if (user.role === 'customer' || user.role === 'agent') {
+        user.role = 'company_admin';
+        db.updateUser(user.id, { role: 'company_admin' });
+      }
     }
 
     res.json({
