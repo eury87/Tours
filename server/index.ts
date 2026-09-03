@@ -3,6 +3,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 
 import toursRouter from './routes/tours';
 import bookingsRouter from './routes/bookings';

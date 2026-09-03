@@ -1,17 +1,24 @@
-import makeWASocket, { 
-  DisconnectReason, 
-  useMultiFileAuthState, 
-  fetchLatestBaileysVersion,
-  WASocket
-} from '@whiskeysockets/baileys';
 import QRCode from 'qrcode';
 import path from 'path';
 import fs from 'fs';
 import { Server as SocketIOServer } from 'socket.io';
 import { db } from '../db/store';
 
+let baileysModule: any = null;
+async function getBaileys() {
+  if (!baileysModule) {
+    try {
+      baileysModule = await import('@whiskeysockets/baileys');
+    } catch (err: any) {
+      console.warn('[WhatsApp-QR] Advertencia: No se pudo cargar @whiskeysockets/baileys en este runtime de Node:', err.message);
+      return null;
+    }
+  }
+  return baileysModule;
+}
+
 class WhatsAppQrService {
-  private sock: WASocket | null = null;
+  private sock: any = null;
   private qrDataUrl: string | null = null;
   private isConnected: boolean = false;
   private connectedPhone: string | null = null;
@@ -53,6 +60,15 @@ class WhatsAppQrService {
     }
 
     try {
+      const baileys = await getBaileys();
+      if (!baileys) {
+        this.isInitializing = false;
+        return { success: false, message: 'Módulo de WhatsApp QR temporalmente no compatible con la versión del runtime.' };
+      }
+
+      const makeWASocket = baileys.default || baileys;
+      const { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = baileys;
+
       const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
       const { version } = await fetchLatestBaileysVersion();
 
@@ -70,7 +86,7 @@ class WhatsAppQrService {
 
       sock.ev.on('creds.update', saveCreds);
 
-      sock.ev.on('connection.update', async (update) => {
+      sock.ev.on('connection.update', async (update: any) => {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {

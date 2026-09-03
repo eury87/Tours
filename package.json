@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Sistema integral de reservas de tours online con notificaciones multicanal (Email, WhatsApp, In-App) y pasarela de pagos.",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=20.0.0 <23.0.0"
+  },
   "scripts": {
     "start": "npx tsx server/index.ts",
     "server": "npx tsx watch server/index.ts",
