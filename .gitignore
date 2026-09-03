@@ -8,6 +8,9 @@ client/node_modules/
 .env.local
 .env.production
 .env*.local
+client_secret*.json
+*.pem
+*.key
 
 # Compilación y producción
 client/dist/
