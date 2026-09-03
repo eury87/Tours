@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, Company } from '../types';
 
+import { supabase } from '../supabaseClient';
+
 interface AuthContextValue {
   currentUser: User;
   activeRole: UserRole;
@@ -36,46 +38,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  const syncUserWithBackend = async (supabaseUser: any) => {
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0],
+          picture: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture,
+          sub: supabaseUser.id,
+        }),
+      });
+      const d = await res.json();
+      if (d.data?.user) {
+        setCurrentUser(d.data.user);
+        localStorage.setItem('terra_auth_user', JSON.stringify(d.data.user));
+      }
+    } catch (err) {
+      console.error('Error sincronizando usuario Google con backend:', err);
+    }
+  };
+
   useEffect(() => {
     fetch('/api/auth/companies')
       .then(res => res.json())
       .then(data => setCompanies(data.data || []))
       .catch(console.error);
 
-    // Escuchar retorno de Google OAuth desde Supabase (#access_token=...)
-    if (window.location.hash && window.location.hash.includes('access_token')) {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      if (accessToken) {
-        fetch('https://nhaaxhwbfcgtgnursyya.supabase.co/auth/v1/user', {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        })
-          .then(res => res.json())
-          .then(supabaseUser => {
-            if (supabaseUser && supabaseUser.email) {
-              fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  email: supabaseUser.email,
-                  name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-                  picture: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture,
-                  sub: supabaseUser.id
-                })
-              })
-                .then(r => r.json())
-                .then(d => {
-                  if (d.data?.user) {
-                    setCurrentUser(d.data.user);
-                    localStorage.setItem('terra_auth_user', JSON.stringify(d.data.user));
-                    window.history.replaceState(null, '', window.location.pathname);
-                  }
-                });
-            }
-          })
-          .catch(console.error);
+    // 1. Verificar sesión existente en Supabase
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email) {
+        syncUserWithBackend(session.user);
       }
-    }
+    });
+
+    // 2. Escuchar inicio de sesión con Google (tanto PKCE como hash OAuth)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user?.email) {
+        syncUserWithBackend(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(GUEST_USER);
+        localStorage.removeItem('terra_auth_user');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const switchRole = async (role: UserRole) => {
@@ -101,7 +111,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoginModalOpen(false);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (_) {}
     localStorage.removeItem('terra_auth_user');
     setCurrentUser(GUEST_USER);
   };

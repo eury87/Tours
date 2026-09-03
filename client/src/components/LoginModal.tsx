@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { User as UserType } from '../types';
+import { supabase } from '../supabaseClient';
 
 export const LoginModal: React.FC = () => {
   const { isLoginModalOpen, closeLoginModal, switchUser, currentUser } = useAuth();
@@ -71,12 +72,24 @@ export const LoginModal: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
     setErrorMessage('');
-    // Redirige al flujo oficial de Google OAuth configurado en Supabase
-    const redirectUrl = encodeURIComponent(window.location.origin);
-    window.location.href = `https://nhaaxhwbfcgtgnursyya.supabase.co/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) {
+        setErrorMessage(error.message);
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Error al conectar con Google');
+      setIsLoading(false);
+    }
   };
 
   const handleRegisterAgent = async (e: React.FormEvent) => {

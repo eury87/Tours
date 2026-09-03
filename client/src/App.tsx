@@ -25,8 +25,15 @@ export function AppContent() {
   const [existingBookingForCheckout, setExistingBookingForCheckout] = useState<Booking | null>(null);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isPaletteModalOpen, setIsPaletteModalOpen] = useState(false);
-  const { activeRole } = useAuth();
+  const { activeRole, currentUser } = useAuth();
   const { t } = useLanguage();
+
+  // Redirigir al panel de administración cuando se inicia sesión como agente o administrador
+  useEffect(() => {
+    if (currentUser && (currentUser.role === 'company_admin' || currentUser.role === 'agent' || currentUser.role === 'superadmin')) {
+      setCurrentView('admin');
+    }
+  }, [currentUser?.id, currentUser?.role]);
 
   // Escuchar enlaces de pago por WhatsApp/Email (?bookingId=bkg-xxx&step=checkout)
   useEffect(() => {
