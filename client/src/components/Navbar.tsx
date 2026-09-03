@@ -29,9 +29,10 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpenNotificationsModal }) => {
   const { notifications, unreadCount, markNotificationsAsRead } = useSocket();
-  const { currentUser, activeRole, openLoginModal, activeCompany } = useAuth();
+  const { currentUser, activeRole, openLoginModal, logout, activeCompany } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [showBellDropdown, setShowBellDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -201,35 +202,78 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
           </button>
 
           {/* Botón Estratégico de Acceso para Agentes / Perfil Activo */}
-          <button
-            onClick={openLoginModal}
-            className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-left transition-all shadow-sm group"
-            title={currentUser.role === 'customer' ? 'Acceso exclusivo para Agentes y Dueños de Agencia' : 'Panel de Perfil & Agentes'}
-          >
-            {currentUser.role === 'customer' ? (
-              <>
-                <div className="w-6 h-6 rounded-lg bg-[#E8E1D1]/20 border border-[#E8E1D1]/30 flex items-center justify-center text-[#E8E1D1] group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                </div>
-                <div className="hidden sm:block">
-                  <span className="text-xs font-bold text-white tracking-wide">Portal Agentes</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30" />
-                <div className="hidden sm:block">
-                  <div className="text-[11px] font-bold text-white leading-none truncate max-w-[90px] md:max-w-[120px]">
-                    {currentUser.name.split(' ')[0]}
+          <div className="relative">
+            <button
+              onClick={() => {
+                if (currentUser.role === 'customer') {
+                  openLoginModal();
+                } else {
+                  setShowUserDropdown(!showUserDropdown);
+                }
+              }}
+              className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-left transition-all shadow-sm group"
+              title={currentUser.role === 'customer' ? 'Acceso exclusivo para Agentes y Dueños de Agencia' : 'Menú de Perfil'}
+            >
+              {currentUser.role === 'customer' ? (
+                <>
+                  <div className="w-6 h-6 rounded-lg bg-[#E8E1D1]/20 border border-[#E8E1D1]/30 flex items-center justify-center text-[#E8E1D1] group-hover:scale-105 transition-transform">
+                    <ShieldCheck className="w-3.5 h-3.5" />
                   </div>
-                  <div className="text-[9px] text-[#E8E1D1] font-bold uppercase leading-tight mt-0.5">
-                    {currentUser.role === 'superadmin' ? 'SuperAdmin' : currentUser.role === 'company_admin' ? 'Dueño' : currentUser.role === 'operator' ? 'Guía' : 'Agente'}
+                  <div className="hidden sm:block">
+                    <span className="text-xs font-bold text-white tracking-wide">Portal Agentes</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30" />
+                  <div className="hidden sm:block">
+                    <div className="text-[11px] font-bold text-white leading-none truncate max-w-[90px] md:max-w-[120px]">
+                      {currentUser.name.split(' ')[0]}
+                    </div>
+                    <div className="text-[9px] text-[#E8E1D1] font-bold uppercase leading-tight mt-0.5">
+                      {currentUser.role === 'superadmin' ? 'SuperAdmin' : currentUser.role === 'company_admin' ? 'Dueño' : currentUser.role === 'operator' ? 'Guía' : 'Agente'}
+                    </div>
+                  </div>
+                  <ChevronDown className="w-3 h-3 text-stone-300 hidden sm:block" />
+                </>
+              )}
+            </button>
+
+            {/* Dropdown de Usuario Autenticado */}
+            {showUserDropdown && currentUser.role !== 'customer' && (
+              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#171916]/95 border border-white/15 shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-white/20" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-xs text-white truncate">{currentUser.name}</div>
+                    <div className="text-[10px] text-slate-400 truncate">{currentUser.email}</div>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#E8E1D1]/10 text-[#E8E1D1] border border-[#E8E1D1]/20">
+                      {currentUser.role}
+                    </span>
                   </div>
                 </div>
-                <ChevronDown className="w-3 h-3 text-stone-300 hidden sm:block" />
-              </>
+
+                <div className="pt-2 space-y-1">
+                  {(currentUser.role === 'company_admin' || currentUser.role === 'superadmin') && (
+                    <button
+                      onClick={() => { onViewChange('admin'); setShowUserDropdown(false); }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-stone-200 hover:text-white hover:bg-white/10 font-semibold transition-colors flex items-center gap-2"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-[#E8E1D1]" />
+                      <span>Panel de Administración</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => { logout(); setShowUserDropdown(false); onViewChange('catalog'); }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-rose-300 hover:text-rose-100 hover:bg-rose-500/10 font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </div>
+              </div>
             )}
-          </button>
+          </div>
 
           {/* Notification Bell */}
           <div className="relative">

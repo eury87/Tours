@@ -71,37 +71,12 @@ export const LoginModal: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsLoading(true);
     setErrorMessage('');
-
-    try {
-      const defaultOwner = usersList.find(u => u.role === 'company_admin');
-      const googleProfile = {
-        email: defaultOwner?.email || 'owner@terraaventura.com',
-        name: defaultOwner?.name || 'Administrador Google',
-        picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-        sub: 'google-oauth2-default'
-      };
-
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(googleProfile),
-      });
-      const data = await res.json();
-
-      if (data.success && data.data?.user) {
-        switchUser(data.data.user);
-        closeLoginModal();
-      } else {
-        setErrorMessage(data.error || 'No se pudo autenticar con Google');
-      }
-    } catch (err: any) {
-      setErrorMessage(`Error con Google: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+    // Redirige al flujo oficial de Google OAuth configurado en Supabase
+    const redirectUrl = encodeURIComponent(window.location.origin);
+    window.location.href = `https://nhaaxhwbfcgtgnursyya.supabase.co/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
   };
 
   const handleRegisterAgent = async (e: React.FormEvent) => {
@@ -209,7 +184,7 @@ export const LoginModal: React.FC = () => {
         )}
 
         {/* TAB 1: LOGIN (GOOGLE + MANUAL) */}
-        {(tab === 'manual' || tab === 'google') && (
+        {tab === 'login' && (
           <div className="space-y-4">
             {/* Google Button */}
             <button

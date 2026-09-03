@@ -9,24 +9,30 @@ interface AuthContextValue {
   switchRole: (role: UserRole) => void;
   switchUser: (user: User) => void;
   switchCompany: (companyId: string) => void;
+  logout: () => void;
   isLoginModalOpen: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
 }
 
-const DEFAULT_USER: User = {
-  id: 'usr-owner',
-  name: 'Lucía Benítez (Dueño Agencia)',
-  email: 'owner@terraaventura.com',
-  role: 'company_admin',
-  companyId: 'comp-1',
-  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+const GUEST_USER: User = {
+  id: 'usr-guest',
+  name: 'Visitante',
+  email: '',
+  role: 'customer',
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User>(DEFAULT_USER);
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    try {
+      const saved = localStorage.getItem('terra_auth_user');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return GUEST_USER;
+  });
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
@@ -35,6 +41,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then(res => res.json())
       .then(data => setCompanies(data.data || []))
       .catch(console.error);
+
+    // Escuchar retorno de Google OAuth desde Supabase (#access_token=...)
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      if (accessToken) {
+        fetch('https://nhaaxhwbfcgtgnursyya.supabase.co/auth/v1/user', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        })
+          .then(res => res.json())
+          .then(supabaseUser => {
+            if (supabaseUser && supabaseUser.email) {
+              fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: supabaseUser.email,
+                  name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+                  picture: supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture,
+                  sub: supabaseUser.id
+                })
+              })
+                .then(r => r.json())
+                .then(d => {
+                  if (d.data?.user) {
+                    setCurrentUser(d.data.user);
+                    localStorage.setItem('terra_auth_user', JSON.stringify(d.data.user));
+                    window.history.replaceState(null, '', window.location.pathname);
+                  }
+                });
+            }
+          })
+          .catch(console.error);
+      }
+    }
   }, []);
 
   const switchRole = async (role: UserRole) => {
@@ -47,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await res.json();
       if (data.data?.user) {
         setCurrentUser(data.data.user);
+        localStorage.setItem('terra_auth_user', JSON.stringify(data.data.user));
       }
     } catch (err) {
       console.error('Error switching role:', err);
@@ -55,7 +97,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchUser = (user: User) => {
     setCurrentUser(user);
+    localStorage.setItem('terra_auth_user', JSON.stringify(user));
     setIsLoginModalOpen(false);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('terra_auth_user');
+    setCurrentUser(GUEST_USER);
   };
 
   const switchCompany = (companyId: string) => {
@@ -77,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchRole,
         switchUser,
         switchCompany,
+        logout,
         isLoginModalOpen,
         openLoginModal: () => setIsLoginModalOpen(true),
         closeLoginModal: () => setIsLoginModalOpen(false),
