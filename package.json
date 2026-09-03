@@ -8,8 +8,8 @@
     "server": "npx tsx watch server/index.ts",
     "client": "npm run dev --prefix client",
     "dev": "npx concurrently \"npm run server\" \"npm run client\"",
-    "build": "npm install --prefix client && npm run build --prefix client",
-    "postinstall": "npm install --prefix client",
+    "build": "npm install --prefix client --include=dev && npm run build --prefix client",
+    "postinstall": "npm install --prefix client --include=dev",
     "db:migrate": "npx tsx server/scripts/migrateToSupabase.ts"
   },
   "dependencies": {
