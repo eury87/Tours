@@ -179,13 +179,16 @@ router.post('/', async (req: Request, res: Response) => {
 
     const savedBooking = db.createBooking(newBooking);
 
-    // Disparar notificaciones multicanal (Email, WhatsApp, In-App)
-    await notificationService.dispatchBookingNotifications(savedBooking, tour, assignedOperator);
-
+    // Responder de inmediato al usuario para que el modal avance al paso de confirmación y QR sin demoras
     res.status(201).json({
       success: true,
       message: 'Reserva creada y confirmada exitosamente',
       data: savedBooking,
+    });
+
+    // Disparar notificaciones multicanal (Email, WhatsApp, In-App) en segundo plano sin congelar la interfaz
+    notificationService.dispatchBookingNotifications(savedBooking, tour, assignedOperator).catch(err => {
+      console.error('[NotificationService] Error enviando notificaciones en segundo plano:', err);
     });
   } catch (err: any) {
     console.error('Error creando reserva:', err);
@@ -223,36 +226,40 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
       }
 
       const updated = db.updateBooking(req.params.id, updatePayload);
+      
+      // Responder de inmediato
+      res.json({ success: true, message: 'Pago completado y notificaciones enviadas', data: updated });
+
       if (updated && isFirstTimePaid) {
         const tour = db.getTourById(updated.tourId);
         if (tour) {
           const operator = updated.assignedOperatorId ? db.getOperatorById(updated.assignedOperatorId) : undefined;
           
-          // 1. Notificaciones al cliente (Email con CC a plataforma + WhatsApp)
-          await notificationService.dispatchBookingNotifications(updated, tour, operator);
+          // 1. Notificaciones al cliente (Email con CC a plataforma + WhatsApp) en background
+          notificationService.dispatchBookingNotifications(updated, tour, operator).catch(err => {
+            console.error('[Bookings] Error enviando notificaciones post-pago:', err);
+          });
 
           // 2. WhatsApp específico al Operario confirmando que el grupo pagó el 100%
           if (operator) {
-            try {
-              const { whatsappQrService } = await import('../services/whatsappQrService');
+            import('../services/whatsappQrService').then(({ whatsappQrService }) => {
               const isReady = typeof whatsappQrService.isActive === 'function' 
                 ? whatsappQrService.isActive() 
                 : whatsappQrService.getStatus().connected;
 
               if (isReady) {
-                await whatsappQrService.sendMessage(
+                whatsappQrService.sendMessage(
                   operator.phone,
                   `🎉 *¡GRUPO 100% PAGADO Y CONFIRMADO!* 🚨\n\nHola *${operator.name}*, el cliente *${updated.leadCustomer.fullName}* ha completado el pago de la reserva *${updated.code}* (${tour.title}).\n\n🧾 *Factura Oficial:* ${updated.invoiceNumber}\n👥 *Total Pasajeros:* ${updated.totalPassengers}\n📲 El grupo ya cuenta con su código QR de abordaje. Todo listo para la salida.`
-                );
+                ).catch((e: any) => console.error('[Bookings] Error WhatsApp operario:', e));
               }
-            } catch (qrErr) {
-              console.error('[Bookings] Error notificando pago a operario vía WhatsApp:', qrErr);
-            }
+            }).catch(qrErr => {
+              console.error('[Bookings] Error cargando whatsappQrService:', qrErr);
+            });
           }
         }
       }
-
-      return res.json({ success: true, message: 'Pago completado y notificaciones enviadas', data: updated });
+      return;
     }
 
     const updated = db.updateBooking(req.params.id, updatePayload);

@@ -53,6 +53,71 @@ export class NotificationService {
   }
 
   /**
+   * Envía correo con fallback inteligente:
+   * 1. Usa Resend HTTPS REST API si hay API key (ultrarrápido, 100ms, no bloquea puertos)
+   * 2. Usa Nodemailer SMTP si no hay Resend API key
+   */
+  public async sendEmail(opts: {
+    to: string;
+    subject: string;
+    html: string;
+    from?: string;
+    cc?: string;
+    settings: SystemSettings;
+  }): Promise<{ success: boolean; messageId?: string; previewUrl?: string }> {
+    const resendKey = process.env.RESEND_API_KEY || (opts.settings.smtpConfig?.pass?.startsWith('re_') ? opts.settings.smtpConfig.pass : null);
+
+    if (resendKey) {
+      try {
+        const fromEmail = (opts.from && opts.from.includes('onboarding@resend.dev'))
+          ? opts.from
+          : 'onboarding@resend.dev';
+
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: `"TerraAventura Tours" <${fromEmail}>`,
+            to: [opts.to],
+            ...(opts.cc ? { cc: [opts.cc] } : {}),
+            subject: opts.subject,
+            html: opts.html,
+          }),
+        });
+
+        const data: any = await res.json();
+        if (res.ok && data.id) {
+          console.log(`[Resend-API] ✉️ Correo enviado vía HTTPS a ${opts.to} (ID: ${data.id})`);
+          return { success: true, messageId: data.id };
+        } else {
+          console.warn('[Resend-API] Advertencia enviando correo:', data);
+        }
+      } catch (err: any) {
+        console.warn('[Resend-API] Error enviando por HTTPS API:', err.message);
+      }
+    }
+
+    try {
+      const { transporter, isSimulated } = await this.getMailTransporter(opts.settings);
+      const info = await transporter.sendMail({
+        from: opts.from || opts.settings.smtpConfig.from,
+        to: opts.to,
+        ...(opts.cc ? { cc: opts.cc } : {}),
+        subject: opts.subject,
+        html: opts.html,
+      });
+      const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
+      return { success: true, messageId: info.messageId, previewUrl };
+    } catch (err: any) {
+      console.error('[Email-SMTP] Error enviando correo:', err.message);
+      return { success: false };
+    }
+  }
+
+  /**
    * Dispara el flujo completo de notificaciones (Email, WhatsApp, In-App) para una nueva reserva o actualización
    */
   public async dispatchBookingNotifications(booking: Booking, tour: Tour, operator?: Operator) {
@@ -92,7 +157,6 @@ export class NotificationService {
     // 2. EMAIL AL CLIENTE (CON COPIA CC A LA PLATAFORMA)
     if (settings.notificationChannels.emailCustomer && booking.leadCustomer.email) {
       try {
-        const { transporter, isSimulated } = await this.getMailTransporter(settings);
         const auditCcEmail = settings.platformAuditEmail || settings.businessEmail;
         const isPaid = booking.paymentStatus === 'completed';
 
@@ -104,7 +168,6 @@ export class NotificationService {
           ? `🎟️ Tu Reserva y Factura están Confirmadas: ${tour.title} (Código: ${booking.code})`
           : `📋 Solicitud de Reserva Recibida: ${tour.title} (Código: ${booking.code})`;
 
-        const fromAddress = settings.smtpConfig.from;
         let toAddress = booking.leadCustomer.email;
         if (toAddress.includes('ejemplo.com') || toAddress.includes('test.com') || toAddress.includes('@test')) {
           toAddress = auditCcEmail || 'eury87@gmail.com';
@@ -114,15 +177,13 @@ export class NotificationService {
           ? auditCcEmail
           : undefined;
 
-        const info = await transporter.sendMail({
-          from: fromAddress,
+        const emailResult = await this.sendEmail({
           to: toAddress,
-          ...(ccAddress ? { cc: ccAddress } : {}),
+          cc: ccAddress,
           subject,
           html: emailHtml,
+          settings,
         });
-
-        const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
 
         db.addNotification({
           id: `notif-email-cust-${Date.now()}`,
@@ -134,31 +195,27 @@ export class NotificationService {
           recipientContact: `${booking.leadCustomer.email} (CC: ${auditCcEmail})`,
           title: isPaid ? `Factura y Reserva Confirmada #${booking.code}` : `Solicitud Recibida #${booking.code}`,
           message: `Correo enviado al cliente con copia de auditoría a ${auditCcEmail}.`,
-          status: 'sent',
+          status: emailResult.success ? 'sent' : 'failed',
           timestamp: new Date().toISOString(),
-          emailPreviewUrl: previewUrl,
+          emailPreviewUrl: emailResult.previewUrl,
         });
-
-        console.log(`[Email] Correo a Cliente (CC: ${auditCcEmail}) enviado: ${info.messageId}${previewUrl ? ` | Preview: ${previewUrl}` : ''}`);
       } catch (err: any) {
         console.error('[Email] Error enviando correo a cliente:', err);
       }
+    }
     }
 
     // 3. EMAIL AL PROPIETARIO / ADMINISTRACIÓN
     if (settings.notificationChannels.emailOwner && settings.businessEmail) {
       try {
-        const { transporter, isSimulated } = await this.getMailTransporter(settings);
         const ownerEmailHtml = getOwnerAlertEmailHtml(booking, tour, assignedOp, settings);
 
-        const info = await transporter.sendMail({
-          from: settings.smtpConfig.from,
+        const emailResult = await this.sendEmail({
           to: settings.businessEmail,
           subject: `💰 Nueva Reserva: ${booking.code} - ${booking.leadCustomer.fullName} (${settings.currencySymbol}${booking.totalAmount.toFixed(2)})`,
           html: ownerEmailHtml,
+          settings,
         });
-
-        const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
 
         db.addNotification({
           id: `notif-email-owner-${Date.now()}`,
@@ -170,9 +227,9 @@ export class NotificationService {
           recipientContact: settings.businessEmail,
           title: `Alerta de Venta #${booking.code}`,
           message: `Ingreso de reserva por ${settings.currencySymbol}${booking.totalAmount.toFixed(2)} ${settings.currency}`,
-          status: 'sent',
+          status: emailResult.success ? 'sent' : 'failed',
           timestamp: new Date().toISOString(),
-          emailPreviewUrl: previewUrl,
+          emailPreviewUrl: emailResult.previewUrl,
         });
       } catch (err: any) {
         console.error('[Email] Error enviando correo a dueño:', err);
@@ -182,17 +239,14 @@ export class NotificationService {
     // 4. EMAIL AL OPERARIO / GUÍA ASIGNADO
     if (settings.notificationChannels.emailOperator && assignedOp && assignedOp.email) {
       try {
-        const { transporter, isSimulated } = await this.getMailTransporter(settings);
         const opEmailHtml = getOperatorDispatchEmailHtml(booking, tour, assignedOp, settings);
 
-        const info = await transporter.sendMail({
-          from: settings.smtpConfig.from,
+        const emailResult = await this.sendEmail({
           to: assignedOp.email,
           subject: `📋 Nueva Hoja de Ruta Asignada: ${tour.title} - ${booking.date} (${booking.code})`,
           html: opEmailHtml,
+          settings,
         });
-
-        const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
 
         db.addNotification({
           id: `notif-email-op-${Date.now()}`,
@@ -204,9 +258,9 @@ export class NotificationService {
           recipientContact: assignedOp.email,
           title: `Orden de Operación #${booking.code}`,
           message: `Lista de pasajeros y datos de ruta enviados al guía.`,
-          status: 'sent',
+          status: emailResult.success ? 'sent' : 'failed',
           timestamp: new Date().toISOString(),
-          emailPreviewUrl: previewUrl,
+          emailPreviewUrl: emailResult.previewUrl,
         });
       } catch (err: any) {
         console.error('[Email] Error enviando correo a operario:', err);
