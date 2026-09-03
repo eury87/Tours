@@ -68,6 +68,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString(), service: 'Tours Booking & Notification API' });
 });
 
+// Servir frontend compilado en producción (despliegue unificado)
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+  console.log(`[Production] 🌐 Frontend estático montado desde: ${clientDistPath}`);
+}
+
 // Conexión WebSockets para clientes y administradores
 io.on('connection', (socket) => {
   console.log(`[WebSocket] Cliente conectado: ${socket.id}`);

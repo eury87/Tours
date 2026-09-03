@@ -4,10 +4,11 @@
   "description": "Sistema integral de reservas de tours online con notificaciones multicanal (Email, WhatsApp, In-App) y pasarela de pagos.",
   "main": "server/index.js",
   "scripts": {
-    "server": "npx.cmd tsx watch server/index.ts",
-    "client": "npm.cmd run dev --prefix client",
-    "dev": "npx.cmd concurrently \"npm.cmd run server\" \"npm.cmd run client\"",
-    "build": "npm.cmd run build --prefix client",
+    "start": "npx tsx server/index.ts",
+    "server": "npx tsx watch server/index.ts",
+    "client": "npm run dev --prefix client",
+    "dev": "npx concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client",
     "db:migrate": "npx tsx server/scripts/migrateToSupabase.ts"
   },
   "dependencies": {
