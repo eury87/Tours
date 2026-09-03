@@ -20,7 +20,7 @@ export const LoginModal: React.FC = () => {
   const { isLoginModalOpen, closeLoginModal, switchUser, currentUser } = useAuth();
   const { t } = useLanguage();
   
-  const [tab, setTab] = useState<'google' | 'manual' | 'register' | 'demo'>('manual');
+  const [tab, setTab] = useState<'login' | 'register'>('login');
   const [usersList, setUsersList] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -76,8 +76,6 @@ export const LoginModal: React.FC = () => {
     setErrorMessage('');
 
     try {
-      // Simular o conectar con Google Identity / Supabase Auth
-      // Si el email del dueño está configurado, iniciar sesión como dueño
       const defaultOwner = usersList.find(u => u.role === 'company_admin');
       const googleProfile = {
         email: defaultOwner?.email || 'owner@terraaventura.com',
@@ -169,14 +167,14 @@ export const LoginModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="grid grid-cols-3 p-1 rounded-2xl bg-black/40 border border-white/10 text-xs font-bold">
+        {/* Navigation Tabs (2 Columnas) */}
+        <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/40 border border-white/10 text-xs font-bold">
           <button
             type="button"
-            onClick={() => { setTab('manual'); setErrorMessage(''); }}
-            className={`py-2 rounded-xl transition-all ${
-              tab === 'manual' || tab === 'google'
-                ? 'bg-[#E8E1D1] text-[#141513] shadow-md'
+            onClick={() => { setTab('login'); setErrorMessage(''); }}
+            className={`py-2.5 rounded-xl transition-all ${
+              tab === 'login'
+                ? 'bg-[#E8E1D1] text-[#141513] shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -185,24 +183,13 @@ export const LoginModal: React.FC = () => {
           <button
             type="button"
             onClick={() => { setTab('register'); setErrorMessage(''); }}
-            className={`py-2 rounded-xl transition-all ${
+            className={`py-2.5 rounded-xl transition-all ${
               tab === 'register'
-                ? 'bg-[#E8E1D1] text-[#141513] shadow-md'
+                ? 'bg-[#E8E1D1] text-[#141513] shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             Crear Agente
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTab('demo'); setErrorMessage(''); }}
-            className={`py-2 rounded-xl transition-all ${
-              tab === 'demo'
-                ? 'bg-[#E8E1D1] text-[#141513] shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Modo Rápido
           </button>
         </div>
 
@@ -364,47 +351,6 @@ export const LoginModal: React.FC = () => {
               <span>{isLoading ? 'Registrando...' : 'Crear Cuenta de Agente'}</span>
             </button>
           </form>
-        )}
-
-        {/* TAB 3: DEMO SWITCHER */}
-        {tab === 'demo' && (
-          <div className="space-y-2">
-            <p className="text-xs text-slate-400 mb-2">
-              Haz clic en cualquier rol para ingresar inmediatamente sin contraseña para fines de testing:
-            </p>
-
-            {usersList.map((user) => {
-              const isCurrent = currentUser.id === user.id;
-
-              return (
-                <div
-                  key={user.id}
-                  onClick={() => switchUser(user)}
-                  className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                    isCurrent
-                      ? 'bg-[#E8E1D1]/15 border-[#E8E1D1] text-white shadow-md'
-                      : 'bg-black/30 border-white/5 text-slate-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-xl object-cover border border-white/10"
-                    />
-                    <div>
-                      <div className="font-bold text-xs text-white">{user.name}</div>
-                      <div className="text-[11px] text-slate-400">{user.email} • <span className="uppercase text-[#E8E1D1]">{user.role}</span></div>
-                    </div>
-                  </div>
-
-                  <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/5 border border-white/10 text-slate-300">
-                    Ingresar
-                  </span>
-                </div>
-              );
-            })}
-          </div>
         )}
 
       </div>
