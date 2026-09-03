@@ -109,11 +109,16 @@ router.post('/', async (req: Request, res: Response) => {
     const tax = subtotal * settings.taxRate;
     const totalAmount = subtotal + tax;
 
-    // Asignar operario/guía por defecto o seleccionado
-    const operators = db.getOperators().filter(o => o.active);
-    let assignedOperator = operators.find(o => o.id === customOperatorId);
-    if (!assignedOperator && operators.length > 0) {
-      assignedOperator = operators[0]; // Asigna al primer guía disponible
+    // Asignar operario/guía: priorizar los operarios asignados y habilitados específicamente para este tour
+    const allActiveOperators = db.getOperators().filter(o => o.active);
+    let assignedOperator = allActiveOperators.find(o => o.id === customOperatorId);
+
+    if (!assignedOperator && tour.availableOperatorIds && tour.availableOperatorIds.length > 0) {
+      assignedOperator = allActiveOperators.find(o => tour.availableOperatorIds!.includes(o.id));
+    }
+
+    if (!assignedOperator && allActiveOperators.length > 0) {
+      assignedOperator = allActiveOperators[0];
     }
 
     const code = generateBookingCode();

@@ -200,22 +200,35 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
 
-          {/* User Role Card & Switcher Button */}
+          {/* Botón Estratégico de Acceso para Agentes / Perfil Activo */}
           <button
             onClick={openLoginModal}
-            className="flex items-center gap-2 py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-left transition-colors shadow-sm"
-            title="Cambiar de Rol / Usuario Demo"
+            className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-left transition-all shadow-sm group"
+            title={currentUser.role === 'customer' ? 'Acceso exclusivo para Agentes y Dueños de Agencia' : 'Panel de Perfil & Agentes'}
           >
-            <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30" />
-            <div className="hidden sm:block">
-              <div className="text-[11px] font-bold text-white leading-none truncate max-w-[90px] md:max-w-[120px]">
-                {currentUser.name.split(' ')[0]}
-              </div>
-              <div className="text-[9px] text-[#E8E1D1] font-bold uppercase leading-tight mt-0.5">
-                {currentUser.role === 'superadmin' ? 'SuperAdmin' : currentUser.role === 'company_admin' ? 'Dueño' : currentUser.role === 'operator' ? 'Guía' : 'Cliente'}
-              </div>
-            </div>
-            <ChevronDown className="w-3 h-3 text-stone-300 hidden sm:block" />
+            {currentUser.role === 'customer' ? (
+              <>
+                <div className="w-6 h-6 rounded-lg bg-[#E8E1D1]/20 border border-[#E8E1D1]/30 flex items-center justify-center text-[#E8E1D1] group-hover:scale-105 transition-transform">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                <div className="hidden sm:block">
+                  <span className="text-xs font-bold text-white tracking-wide">Portal Agentes</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30" />
+                <div className="hidden sm:block">
+                  <div className="text-[11px] font-bold text-white leading-none truncate max-w-[90px] md:max-w-[120px]">
+                    {currentUser.name.split(' ')[0]}
+                  </div>
+                  <div className="text-[9px] text-[#E8E1D1] font-bold uppercase leading-tight mt-0.5">
+                    {currentUser.role === 'superadmin' ? 'SuperAdmin' : currentUser.role === 'company_admin' ? 'Dueño' : currentUser.role === 'operator' ? 'Guía' : 'Agente'}
+                  </div>
+                </div>
+                <ChevronDown className="w-3 h-3 text-stone-300 hidden sm:block" />
+              </>
+            )}
           </button>
 
           {/* Notification Bell */}

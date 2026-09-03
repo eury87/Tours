@@ -26,6 +26,7 @@ export interface Tour {
   reviewsCount: number;
   featured?: boolean;
   requiresOperatorApproval?: boolean; // true = espera aprobación del guía antes de cobrar; false = pago instantáneo
+  availableOperatorIds?: string[]; // IDs de operarios asignados y habilitados para este tour
 }
 
 export interface Passenger {

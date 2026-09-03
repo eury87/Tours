@@ -509,6 +509,16 @@ class Database {
     return this.state.tours[idx];
   }
 
+  public deleteTour(id: string): boolean {
+    const prevLen = this.state.tours.length;
+    this.state.tours = this.state.tours.filter(t => t.id !== id);
+    if (this.state.tours.length !== prevLen) {
+      this.save(this.state);
+      return true;
+    }
+    return false;
+  }
+
   // Bookings
   public getBookings(): Booking[] {
     return this.state.bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -563,6 +573,16 @@ class Database {
     this.state.operators[idx] = { ...this.state.operators[idx], ...update };
     this.save(this.state);
     return this.state.operators[idx];
+  }
+
+  public deleteOperator(id: string): boolean {
+    const prevLen = this.state.operators.length;
+    this.state.operators = this.state.operators.filter(o => o.id !== id);
+    if (this.state.operators.length !== prevLen) {
+      this.save(this.state);
+      return true;
+    }
+    return false;
   }
 
   // Notifications

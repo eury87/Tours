@@ -50,4 +50,16 @@ router.patch('/:id', (req: Request, res: Response) => {
   }
 });
 
+router.delete('/:id', (req: Request, res: Response) => {
+  try {
+    const deleted = db.deleteOperator(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Operario no encontrado' });
+    }
+    res.json({ success: true, message: 'Operario eliminado exitosamente' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;

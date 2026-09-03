@@ -17,20 +17,34 @@ import {
   Trash2,
   Percent,
   Sparkles,
-  Receipt
+  Receipt,
+  Compass,
+  Edit3,
+  ExternalLink,
+  MapPin,
+  Phone
 } from 'lucide-react';
-import { Booking, Operator, BookingStatus, PaymentStatus, Coupon } from '../types';
+import { Tour, Booking, Operator, BookingStatus, PaymentStatus, Coupon } from '../types';
 import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { InvoiceModal } from '../components/InvoiceModal';
+import { TourFormModal } from '../components/TourFormModal';
+import { OperatorFormModal } from '../components/OperatorFormModal';
 
 export const AdminDashboard: React.FC = () => {
   const { liveBookings, refreshBookings } = useSocket();
   const { t } = useLanguage();
+  const [tours, setTours] = useState<Tour[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings' | 'coupons'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'tours' | 'operators' | 'coupons'>('bookings');
   
+  // Modales de Tours y Operadores
+  const [showTourModal, setShowTourModal] = useState(false);
+  const [tourToEdit, setTourToEdit] = useState<Tour | null>(null);
+  const [showOperatorModal, setShowOperatorModal] = useState(false);
+  const [operatorToEdit, setOperatorToEdit] = useState<Operator | null>(null);
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBookingForOp, setSelectedBookingForOp] = useState<Booking | null>(null);
@@ -45,6 +59,20 @@ export const AdminDashboard: React.FC = () => {
   const [newCouponVal, setNewCouponVal] = useState(15);
   const [newCouponMin, setNewCouponMin] = useState(50);
 
+  const fetchTours = () => {
+    fetch('/api/tours')
+      .then(res => res.json())
+      .then(data => setTours(data.data || []))
+      .catch(console.error);
+  };
+
+  const fetchOperators = () => {
+    fetch('/api/operators')
+      .then(res => res.json())
+      .then(data => setOperators(data.data || []))
+      .catch(console.error);
+  };
+
   const fetchCoupons = () => {
     fetch('/api/coupons')
       .then(res => res.json())
@@ -53,13 +81,40 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch('/api/operators')
-      .then(res => res.json())
-      .then(data => setOperators(data.data || []))
-      .catch(console.error);
-
+    fetchOperators();
     fetchCoupons();
+    fetchTours();
   }, []);
+
+  const handleDeleteTour = async (tourId: string) => {
+    if (!window.confirm('¿Seguro que deseas eliminar este tour del catálogo?')) return;
+    try {
+      const res = await fetch(`/api/tours/${tourId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setTours(prev => prev.filter(t => t.id !== tourId));
+      } else {
+        alert(data.error || 'Error al eliminar');
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteOperator = async (opId: string) => {
+    if (!window.confirm('¿Seguro que deseas eliminar este operario?')) return;
+    try {
+      const res = await fetch(`/api/operators/${opId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setOperators(prev => prev.filter(o => o.id !== opId));
+      } else {
+        alert(data.error || 'Error al eliminar');
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+  };
 
   const filteredBookings = liveBookings.filter((b) => {
     if (statusFilter !== 'all' && b.status !== statusFilter) return false;
@@ -228,30 +283,54 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs Switcher: Bookings vs Coupons */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+      {/* Tabs Switcher: Bookings vs Tours vs Operators vs Coupons */}
+      <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('bookings')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
             activeTab === 'bookings'
               ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
               : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>Gestión de Reservas & Salidas ({liveBookings.length})</span>
+          <span>Gestión de Reservas ({liveBookings.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('tours')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'tours'
+              ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
+              : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+          <span>Tours del Catálogo ({tours.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('operators')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'operators'
+              ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
+              : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Operarios & Guías ({operators.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('coupons')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
             activeTab === 'coupons'
               ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
               : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
           }`}
         >
           <Tag className="w-4 h-4" />
-          <span>Motor de Cupones Promocionales ({coupons.length})</span>
+          <span>Cupones Promocionales ({coupons.length})</span>
         </button>
       </div>
 
@@ -442,6 +521,235 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* TAB 3: TOURS DEL CATÁLOGO */}
+      {activeTab === 'tours' && (
+        <div className="glass-panel rounded-3xl border border-white/10 p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-heading font-black text-xl text-white">Tours del Catálogo & Asignación</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Personaliza precios, cupos, fotos y activa qué operarios están disponibles para cada tour.
+              </p>
+            </div>
+
+            <button
+              onClick={() => { setTourToEdit(null); setShowTourModal(true); }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#E8E1D1] hover:bg-[#F8F5EE] text-[#152230] text-xs font-black shadow-lg transition-all active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Crear Nuevo Tour</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tours.map((tour) => {
+              const assignedOps = operators.filter(o => tour.availableOperatorIds?.includes(o.id));
+
+              return (
+                <div key={tour.id} className="rounded-3xl bg-[#181A17]/90 border border-white/10 overflow-hidden flex flex-col hover:border-white/20 transition-all shadow-xl">
+                  {/* Tour Image Header */}
+                  <div className="relative h-44 w-full">
+                    <img
+                      src={tour.images?.[0] || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80'}
+                      alt={tour.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#181A17] via-transparent to-black/40" />
+
+                    <div className="absolute top-3 left-3 flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-black/60 backdrop-blur-md text-white border border-white/20">
+                        {tour.category}
+                      </span>
+                    </div>
+
+                    <div className="absolute top-3 right-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-[#E8E1D1] text-[#141513] shadow">
+                        ${tour.price} USD
+                      </span>
+                    </div>
+
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-stone-200">
+                      <span className="flex items-center gap-1 font-semibold truncate">
+                        <MapPin className="w-3.5 h-3.5 text-[#E8E1D1] shrink-0" />
+                        <span className="truncate">{tour.destination}</span>
+                      </span>
+                      <span className="shrink-0 text-[11px] text-stone-300 font-bold">⏱️ {tour.duration}</span>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <h4 className="font-heading font-black text-base text-white line-clamp-1">{tour.title}</h4>
+                      <p className="text-xs text-slate-400 mt-1 line-clamp-2">{tour.tagline || tour.description}</p>
+                    </div>
+
+                    {/* Modalidad de Aprobación */}
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border ${
+                        tour.requiresOperatorApproval !== false
+                          ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                          : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                      }`}>
+                        {tour.requiresOperatorApproval !== false ? '⏳ Requiere Aprobación de Guía' : '⚡ Pago Instantáneo'}
+                      </span>
+                    </div>
+
+                    {/* Operarios Asignados */}
+                    <div className="pt-3 border-t border-white/10">
+                      <div className="text-[11px] font-bold text-[#E8E1D1] mb-2 flex items-center justify-between">
+                        <span>Operarios Habilitados ({assignedOps.length}):</span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 min-h-[32px]">
+                        {assignedOps.length > 0 ? (
+                          assignedOps.map(op => (
+                            <span
+                              key={op.id}
+                              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-300"
+                              title={`${op.name} (${op.phone})`}
+                            >
+                              <img src={op.avatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                              <span className="truncate max-w-[100px]">{op.name.split(' ')[0]}</span>
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[11px] text-slate-500 italic">
+                            Todos los operarios activos por defecto
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => handleDeleteTour(tour.id)}
+                        className="p-2 rounded-xl text-stone-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                        title="Eliminar tour"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => { setTourToEdit(tour); setShowTourModal(true); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold border border-white/10 transition-all"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-[#E8E1D1]" />
+                        <span>Editar Tour & Guías</span>
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: OPERARIOS & GUÍAS */}
+      {activeTab === 'operators' && (
+        <div className="glass-panel rounded-3xl border border-white/10 p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-heading font-black text-xl text-white">Directorio de Operarios & Guías</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Registra a tu equipo, configura sus números de WhatsApp y gestiona su disponibilidad para salidas.
+              </p>
+            </div>
+
+            <button
+              onClick={() => { setOperatorToEdit(null); setShowOperatorModal(true); }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#E8E1D1] hover:bg-[#F8F5EE] text-[#152230] text-xs font-black shadow-lg transition-all active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Registrar Operario</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {operators.map((op) => (
+              <div key={op.id} className="p-5 rounded-3xl bg-[#181A17]/90 border border-white/10 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
+                
+                <div className="flex items-start gap-4">
+                  <img
+                    src={op.avatar}
+                    alt={op.name}
+                    className="w-16 h-16 rounded-2xl object-cover border border-white/15 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-heading font-bold text-base text-white truncate">{op.name}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
+                        op.active
+                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                          : 'bg-slate-700 text-slate-400 border-slate-600'
+                      }`}>
+                        {op.active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-[#E8E1D1] font-semibold mt-0.5">{op.role}</div>
+                    <div className="text-[11px] text-slate-400 truncate mt-1">{op.email}</div>
+                  </div>
+                </div>
+
+                {/* WhatsApp Direct Link */}
+                <div className="p-3 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="font-mono text-xs text-slate-200 truncate">{op.phone}</span>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${op.phone.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold transition-colors flex items-center gap-1 shrink-0"
+                  >
+                    <span>Chat</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* Idiomas */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Idiomas:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {op.languages?.map(lang => (
+                      <span key={lang} className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-slate-300">
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => handleDeleteOperator(op.id)}
+                    className="p-2 rounded-xl text-stone-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                    title="Eliminar operario"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => { setOperatorToEdit(op); setShowOperatorModal(true); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold border border-white/10 transition-all"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-[#E8E1D1]" />
+                    <span>Editar Información</span>
+                  </button>
+                </div>
+
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Create Coupon Modal */}
       {showCreateCouponModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#10110E]/85 backdrop-blur-md">
@@ -565,6 +873,27 @@ export const AdminDashboard: React.FC = () => {
         booking={selectedBookingForInvoice}
         isOpen={!!selectedBookingForInvoice}
         onClose={() => setSelectedBookingForInvoice(null)}
+      />
+
+      {/* Modal de Creación / Edición de Tour Personalizado */}
+      <TourFormModal
+        isOpen={showTourModal}
+        onClose={() => setShowTourModal(false)}
+        onSaved={() => {
+          fetchTours();
+        }}
+        tourToEdit={tourToEdit}
+        operators={operators}
+      />
+
+      {/* Modal de Creación / Edición de Operarios */}
+      <OperatorFormModal
+        isOpen={showOperatorModal}
+        onClose={() => setShowOperatorModal(false)}
+        onSaved={() => {
+          fetchOperators();
+        }}
+        operatorToEdit={operatorToEdit}
       />
 
     </div>
