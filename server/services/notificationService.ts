@@ -69,9 +69,14 @@ export class NotificationService {
 
     if (resendKey) {
       try {
-        const fromEmail = (opts.from && opts.from.includes('onboarding@resend.dev'))
-          ? opts.from
-          : 'onboarding@resend.dev';
+        const rawFrom = opts.from || opts.settings.smtpConfig?.from || 'TerraAventura Tours <reservas@test.rodeotest.shop>';
+        const fromEmail = rawFrom.includes('<') ? rawFrom : `"TerraAventura Tours" <${rawFrom}>`;
+
+        // Si el destinatario es de prueba (ej: andrea@ejemplo.com, test@tours.com), redirigir a euryhealer@gmail.com
+        let targetTo = opts.to;
+        if (targetTo.includes('ejemplo.com') || targetTo.includes('test.com') || targetTo.includes('tours.com') || targetTo.includes('@test')) {
+          targetTo = opts.settings.platformAuditEmail || opts.settings.businessEmail || 'euryhealer@gmail.com';
+        }
 
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -80,9 +85,9 @@ export class NotificationService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: `"TerraAventura Tours" <${fromEmail}>`,
-            to: [opts.to],
-            ...(opts.cc ? { cc: [opts.cc] } : {}),
+            from: fromEmail,
+            to: [targetTo],
+            ...(opts.cc && opts.cc !== targetTo ? { cc: [opts.cc] } : {}),
             subject: opts.subject,
             html: opts.html,
           }),
@@ -90,10 +95,10 @@ export class NotificationService {
 
         const data: any = await res.json();
         if (res.ok && data.id) {
-          console.log(`[Resend-API] ✉️ Correo enviado vía HTTPS a ${opts.to} (ID: ${data.id})`);
+          console.log(`[Resend-API] ✉️ Correo entregado vía HTTPS a ${targetTo} (ID: ${data.id})`);
           return { success: true, messageId: data.id };
         } else {
-          console.warn('[Resend-API] Advertencia enviando correo:', data);
+          console.warn('[Resend-API] Respuesta de Resend:', data);
         }
       } catch (err: any) {
         console.warn('[Resend-API] Error enviando por HTTPS API:', err.message);
