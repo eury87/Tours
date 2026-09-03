@@ -8,8 +8,8 @@
     "server": "npx tsx watch server/index.ts",
     "client": "npm run dev --prefix client",
     "dev": "npx concurrently \"npm run server\" \"npm run client\"",
-    "build": "npm install --prefix client --include=dev && npm run build --prefix client",
-    "postinstall": "npm install --prefix client --include=dev",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
+    "postinstall": "npm install --prefix client",
     "db:migrate": "npx tsx server/scripts/migrateToSupabase.ts"
   },
   "dependencies": {
@@ -23,7 +23,9 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
     "qrcode": "^1.5.4",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -32,8 +34,6 @@
     "@types/node": "^22.13.4",
     "@types/nodemailer": "^6.4.17",
     "@types/qrcode": "^1.5.6",
-    "concurrently": "^9.1.2",
-    "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "concurrently": "^9.1.2"
   }
 }
