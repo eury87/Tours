@@ -36,8 +36,7 @@ export const AdminDashboard: React.FC = () => {
   const { t } = useLanguage();
   const [tours, setTours] = useState<Tour[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookings' | 'tours' | 'operators' | 'coupons'>('bookings');
+  const [activeTab, setActiveTab] = useState<'tours' | 'operators' | 'coupons'>('tours');
   
   // Modales de Tours y Operadores
   const [showTourModal, setShowTourModal] = useState(false);
@@ -210,10 +209,10 @@ export const AdminDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-heading font-black text-2xl sm:text-3xl text-white">
-            {t('adminTitle')}
+            Mis Tours & Operaciones
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            {t('adminSubtitle')}
+            Administra tus experiencias turísticas, tarifas, operarios asignados y salidas oficiales.
           </p>
         </div>
 
@@ -223,15 +222,19 @@ export const AdminDashboard: React.FC = () => {
               setTourToEdit(null);
               setShowTourModal(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E8E1D1] hover:bg-[#ded6c4] text-[#141513] text-xs font-bold transition-all shadow-md active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E8E1D1] hover:bg-[#ded6c4] text-[#141513] text-xs font-bold transition-all shadow-md active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>+ Crear Nuevo Tour</span>
           </button>
 
           <button
-            onClick={() => refreshBookings()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1C1E1B] border border-white/10 text-stone-300 hover:text-white hover:bg-[#232521] text-xs font-semibold transition-colors shadow"
+            onClick={() => {
+              fetchTours();
+              fetchOperators();
+              fetchCoupons();
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1C1E1B] border border-white/10 text-stone-300 hover:text-white hover:bg-[#232521] text-xs font-semibold transition-colors shadow"
           >
             <RotateCw className="w-4 h-4" />
             <span>Refrescar</span>
@@ -239,75 +242,50 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Metrics Row enfocada en Tours y Operarios */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <div className="p-6 rounded-3xl glass-card border border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E8E1D1]">{t('totalRevenue')}</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#E8E1D1]">Tours Activos</span>
             <div className="w-10 h-10 rounded-xl bg-white/5 text-[#E8E1D1] border border-white/10 flex items-center justify-center">
-              <DollarSign className="w-5 h-5" />
+              <Compass className="w-5 h-5" />
             </div>
           </div>
           <div className="font-heading font-black text-2xl sm:text-3xl text-white mt-3">
-            ${totalRevenue.toFixed(2)} <span className="text-xs text-slate-400 font-normal">USD</span>
+            {tours.length}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">Facturado en línea</p>
+          <p className="text-[11px] text-slate-400 mt-1">Publicados en el catálogo</p>
         </div>
 
         <div className="p-6 rounded-3xl glass-card border border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">{t('totalBookings')}</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Operarios & Guías</span>
             <div className="w-10 h-10 rounded-xl bg-white/5 text-slate-300 border border-white/10 flex items-center justify-center">
-              <Calendar className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="font-heading font-black text-2xl sm:text-3xl text-white mt-3">
-            {liveBookings.length}
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Salidas registradas</p>
-        </div>
-
-        <div className="p-6 rounded-3xl glass-card border border-white/10">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">{t('totalPax')}</span>
-            <div className="w-10 h-10 rounded-xl bg-white/5 text-amber-400 border border-white/10 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
           </div>
           <div className="font-heading font-black text-2xl sm:text-3xl text-white mt-3">
-            {totalPassengers}
+            {operators.length}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">Adultos y niños</p>
+          <p className="text-[11px] text-slate-400 mt-1">Disponibles para asignación</p>
         </div>
 
         <div className="p-6 rounded-3xl glass-card border border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E8E1D1]">{t('couponsTab')}</span>
-            <div className="w-10 h-10 rounded-xl bg-white/5 text-[#E8E1D1] border border-white/10 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Cupones Activos</span>
+            <div className="w-10 h-10 rounded-xl bg-white/5 text-amber-400 border border-white/10 flex items-center justify-center">
               <Tag className="w-5 h-5" />
             </div>
           </div>
           <div className="font-heading font-black text-2xl sm:text-3xl text-white mt-3">
             {coupons.length}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">Cupones activos</p>
+          <p className="text-[11px] text-slate-400 mt-1">Promociones y descuentos</p>
         </div>
       </div>
 
-      {/* Tabs Switcher: Bookings vs Tours vs Operators vs Coupons */}
+      {/* Tabs Switcher: Tours vs Operators vs Coupons */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('bookings')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'bookings'
-              ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
-              : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
-          }`}
-        >
-          <Calendar className="w-4 h-4" />
-          <span>Gestión de Reservas ({liveBookings.length})</span>
-        </button>
-
         <button
           onClick={() => setActiveTab('tours')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
@@ -317,7 +295,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <Compass className="w-4 h-4" />
-          <span>Tours del Catálogo ({tours.length})</span>
+          <span>Mis Tours ({tours.length})</span>
         </button>
 
         <button
@@ -341,7 +319,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <Tag className="w-4 h-4" />
-          <span>Cupones Promocionales ({coupons.length})</span>
+          <span>Cupones de Descuento ({coupons.length})</span>
         </button>
       </div>
 

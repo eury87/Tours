@@ -14,7 +14,8 @@ import {
   Layers, 
   X,
   ChevronDown,
-  ShieldCheck
+  ShieldCheck,
+  Menu
 } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
   const { language, setLanguage, t } = useLanguage();
   const [showBellDropdown, setShowBellDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -57,33 +59,33 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
         ? 'absolute top-0 left-0 right-0 bg-transparent border-none'
         : 'relative bg-transparent border-none'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 md:gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-6">
         
         {/* Left: Brand / Tenant Logo completamente limpio sin caja oscura */}
         <div 
           onClick={() => onViewChange('catalog')}
-          className="flex items-center gap-3 cursor-pointer shrink-0 group"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0 group min-w-0"
         >
-          <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 p-1 flex items-center justify-center text-[#E8E1D1] group-hover:border-[#E8E1D1] shadow transition-all duration-300 group-hover:scale-105">
-            <Mountain className="w-5 h-5 text-[#E8E1D1]" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 border border-white/20 p-1 flex items-center justify-center text-[#E8E1D1] group-hover:border-[#E8E1D1] shadow transition-all duration-300 group-hover:scale-105 shrink-0">
+            <Mountain className="w-4 h-4 sm:w-5 sm:h-5 text-[#E8E1D1]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-heading font-black text-base sm:text-lg tracking-[0.18em] text-white uppercase drop-shadow">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-heading font-black text-sm sm:text-base md:text-lg tracking-[0.12em] sm:tracking-[0.18em] text-white uppercase drop-shadow truncate">
                 {activeCompany?.name ? activeCompany.name.split(' ')[0].toUpperCase() : 'TERRAAVENTURA'}
               </span>
-              <span className="text-[8px] uppercase font-extrabold tracking-widest bg-[#E8E1D1]/15 text-[#E8E1D1] border border-[#E8E1D1]/30 px-1.5 py-0.5 rounded-full">
+              <span className="text-[7px] sm:text-[8px] uppercase font-extrabold tracking-widest bg-[#E8E1D1]/15 text-[#E8E1D1] border border-[#E8E1D1]/30 px-1 py-0.5 rounded-full shrink-0">
                 LUXE
               </span>
             </div>
-            <p className="text-[8px] uppercase tracking-[0.25em] text-stone-300 font-bold leading-none mt-0.5 drop-shadow-sm">
+            <p className="hidden md:block text-[8px] uppercase tracking-[0.25em] text-stone-300 font-bold leading-none mt-0.5 drop-shadow-sm">
               EXPLORE. DREAM. DISCOVER.
             </p>
           </div>
         </div>
 
-        {/* Center: View Navigation (Responsive Tabs sin fondo oscuro) */}
-        <nav className="hidden md:flex items-center gap-1.5 bg-white/5 backdrop-blur-md p-1.5 rounded-full border border-white/15 shadow-lg">
+        {/* Center: View Navigation (Responsive Tabs para pantallas grandes) */}
+        <nav className="hidden lg:flex items-center gap-1.5 bg-white/5 backdrop-blur-md p-1.5 rounded-full border border-white/15 shadow-lg">
           
           <button
             onClick={() => onViewChange('catalog')}
@@ -346,55 +348,60 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
 
       </div>
 
-      {/* Mobile navigation bottom bar */}
-      <div className="md:hidden flex items-center justify-around bg-[#141513]/95 border-t border-white/10 py-2.5 px-2 backdrop-blur-xl">
+      {/* Mobile navigation bottom bar (Fija y flotante tipo App nativa) */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-[#141513]/95 border-t border-white/10 py-2 px-3 backdrop-blur-2xl shadow-2xl flex items-center justify-around">
         <button
           onClick={() => onViewChange('catalog')}
-          className={`flex flex-col items-center gap-1 text-xs ${currentView === 'catalog' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-all ${
+            currentView === 'catalog' ? 'text-[#E8E1D1]' : 'text-stone-400 hover:text-white'
+          }`}
         >
           <Compass className="w-4 h-4" />
           <span>Tours</span>
         </button>
-        {(activeRole === 'superadmin' || activeRole === 'company_admin') && (
+
+        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent') && (
           <button
             onClick={() => onViewChange('admin')}
-            className={`flex flex-col items-center gap-1 text-xs ${currentView === 'admin' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-all ${
+              currentView === 'admin' ? 'text-[#E8E1D1]' : 'text-stone-400 hover:text-white'
+            }`}
           >
             <LayoutDashboard className="w-4 h-4" />
             <span>Dueño</span>
           </button>
         )}
-        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'operator') && (
+
+        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent' || activeRole === 'operator') && (
           <button
             onClick={() => onViewChange('manifest')}
-            className={`flex flex-col items-center gap-1 text-xs ${currentView === 'manifest' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-all ${
+              currentView === 'manifest' ? 'text-[#E8E1D1]' : 'text-stone-400 hover:text-white'
+            }`}
           >
             <ClipboardList className="w-4 h-4" />
             <span>Guía</span>
           </button>
         )}
-        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'operator') && (
+
+        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent' || activeRole === 'operator') && (
           <button
             onClick={() => onViewChange('scanner')}
-            className={`flex flex-col items-center gap-1 text-xs ${currentView === 'scanner' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-all ${
+              currentView === 'scanner' ? 'text-[#E8E1D1]' : 'text-stone-400 hover:text-white'
+            }`}
           >
             <QrCode className="w-4 h-4" />
             <span>QR</span>
           </button>
         )}
-        {activeRole === 'superadmin' && (
-          <button
-            onClick={() => onViewChange('saas')}
-            className={`flex flex-col items-center gap-1 text-xs ${currentView === 'saas' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>SaaS</span>
-          </button>
-        )}
-        {(activeRole === 'superadmin' || activeRole === 'company_admin') && (
+
+        {(activeRole === 'superadmin' || activeRole === 'company_admin' || activeRole === 'agent') && (
           <button
             onClick={() => onViewChange('settings')}
-            className={`flex flex-col items-center gap-1 text-xs ${currentView === 'settings' ? 'text-[#E8E1D1] font-bold' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-all ${
+              currentView === 'settings' ? 'text-[#E8E1D1]' : 'text-stone-400 hover:text-white'
+            }`}
           >
             <SettingsIcon className="w-4 h-4" />
             <span>Ajustes</span>
