@@ -100,4 +100,19 @@ server.listen(PORT, () => {
   whatsappQrService.startSession().catch((err) => {
     console.log('[WhatsApp-QR] Esperando vinculación manual por QR.');
   });
+
+  // Auto-ping Keep-Alive para evitar que Render duerma el contenedor (duerme tras 15 min de inactividad)
+  const externalUrl = process.env.PUBLIC_APP_URL || process.env.RENDER_EXTERNAL_URL;
+  if (externalUrl) {
+    const healthUrl = `${externalUrl.replace(/\/$/, '')}/api/health`;
+    console.log(`[Keep-Alive] 💓 Keep-Alive automático activado cada 10 minutos a: ${healthUrl}`);
+    setInterval(async () => {
+      try {
+        await fetch(healthUrl);
+        console.log(`[Keep-Alive] 💓 Ping de actividad enviado a ${healthUrl}`);
+      } catch (err: any) {
+        // Ignorar errores temporales
+      }
+    }, 10 * 60 * 1000); // Cada 10 minutos
+  }
 });
