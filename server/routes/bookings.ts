@@ -230,7 +230,7 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
       // Responder de inmediato
       res.json({ success: true, message: 'Pago completado y notificaciones enviadas', data: updated });
 
-      if (updated && isFirstTimePaid) {
+      if (updated) {
         const tour = db.getTourById(updated.tourId);
         if (tour) {
           const operator = updated.assignedOperatorId ? db.getOperatorById(updated.assignedOperatorId) : undefined;
