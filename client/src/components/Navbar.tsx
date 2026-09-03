@@ -193,15 +193,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             </button>
           </div>
 
-          {/* Mint CTA Button inspired by Wanderlust */}
-          <button
-            onClick={() => onViewChange('catalog')}
-            className="btn-mint hidden lg:flex items-center gap-2 px-5 py-2 rounded-full text-xs font-black shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0"
-          >
-            <span>Plan Your Trip</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-
           {/* Botón Estratégico de Acceso para Agentes / Perfil Activo */}
           <div className="relative">
             <button

@@ -219,6 +219,17 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              setTourToEdit(null);
+              setShowTourModal(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E8E1D1] hover:bg-[#ded6c4] text-[#141513] text-xs font-bold transition-all shadow-md active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Crear Nuevo Tour</span>
+          </button>
+
+          <button
             onClick={() => refreshBookings()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1C1E1B] border border-white/10 text-stone-300 hover:text-white hover:bg-[#232521] text-xs font-semibold transition-colors shadow"
           >
