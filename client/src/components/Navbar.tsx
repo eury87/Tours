@@ -13,7 +13,8 @@ import {
   MessageSquare, 
   Layers, 
   X,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
@@ -225,13 +226,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
                 </>
               ) : (
                 <>
-                  <img src={currentUser.avatar} alt="" className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30" />
+                  <img
+                    src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                    alt=""
+                    className="w-7 h-7 rounded-lg object-cover ring-1 ring-white/30"
+                  />
                   <div className="hidden sm:block">
                     <div className="text-[11px] font-bold text-white leading-none truncate max-w-[90px] md:max-w-[120px]">
-                      {currentUser.name.split(' ')[0]}
+                      {currentUser?.name ? currentUser.name.split(' ')[0] : 'Agente'}
                     </div>
                     <div className="text-[9px] text-[#E8E1D1] font-bold uppercase leading-tight mt-0.5">
-                      {currentUser.role === 'superadmin' ? 'SuperAdmin' : currentUser.role === 'company_admin' ? 'Dueño' : currentUser.role === 'operator' ? 'Guía' : 'Agente'}
+                      {currentUser?.role === 'superadmin' ? 'SuperAdmin' : currentUser?.role === 'company_admin' ? 'Dueño' : currentUser?.role === 'operator' ? 'Guía' : 'Agente'}
                     </div>
                   </div>
                   <ChevronDown className="w-3 h-3 text-stone-300 hidden sm:block" />
@@ -240,15 +245,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange, onOpe
             </button>
 
             {/* Dropdown de Usuario Autenticado */}
-            {showUserDropdown && currentUser.role !== 'customer' && (
+            {showUserDropdown && currentUser?.role !== 'customer' && (
               <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#171916]/95 border border-white/15 shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-                  <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-white/20" />
+                  <img
+                    src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                    alt=""
+                    className="w-10 h-10 rounded-xl object-cover border border-white/20"
+                  />
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs text-white truncate">{currentUser.name}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{currentUser.email}</div>
+                    <div className="font-bold text-xs text-white truncate">{currentUser?.name || 'Agente'}</div>
+                    <div className="text-[10px] text-slate-400 truncate">{currentUser?.email || ''}</div>
                     <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#E8E1D1]/10 text-[#E8E1D1] border border-[#E8E1D1]/20">
-                      {currentUser.role}
+                      {currentUser?.role || 'agente'}
                     </span>
                   </div>
                 </div>
