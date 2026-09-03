@@ -351,17 +351,16 @@ En cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio e
   public async notifyOperatorAccepted(booking: Booking, operator: Operator, tour: Tour) {
     const settings = db.getSettings();
     const auditCcEmail = settings.platformAuditEmail || settings.businessEmail;
-    const checkoutUrl = `http://127.0.0.1:3000/?bookingId=${booking.id}&step=checkout`;
+    const baseUrl = process.env.PUBLIC_APP_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
+    const checkoutUrl = `${baseUrl.replace(/\/$/, '')}/?bookingId=${booking.id}&step=checkout`;
 
     console.log(`[NotificationService] Guía ${operator.name} aceptó el tour ${booking.code}. Notificando a cliente...`);
 
     // 1. Email al cliente con CC a la plataforma
     if (settings.notificationChannels.emailCustomer && booking.leadCustomer.email) {
       try {
-        const { transporter, isSimulated } = await this.getMailTransporter(settings);
         const emailHtml = getCustomerOperatorAcceptedEmailHtml(booking, tour, operator, settings, checkoutUrl);
 
-        const fromAddress = settings.smtpConfig.from;
         let toAddress = booking.leadCustomer.email;
         if (toAddress.includes('ejemplo.com') || toAddress.includes('test.com') || toAddress.includes('@test')) {
           toAddress = auditCcEmail || 'eury87@gmail.com';
@@ -371,15 +370,14 @@ En cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio e
           ? auditCcEmail
           : undefined;
 
-        const info = await transporter.sendMail({
-          from: fromAddress,
+        const emailResult = await this.sendEmail({
           to: toAddress,
-          ...(ccAddress ? { cc: ccAddress } : {}),
+          cc: ccAddress,
           subject: `🎉 ¡Tu Guía ha Confirmado la Salida! Procede con el Pago: ${tour.title} (${booking.code})`,
           html: emailHtml,
+          settings,
         });
 
-        const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
         db.addNotification({
           id: `notif-email-accepted-${Date.now()}`,
           bookingId: booking.id,
@@ -390,12 +388,10 @@ En cuanto tu guía confirme disponibilidad, te enviaremos por este mismo medio e
           recipientContact: `${booking.leadCustomer.email} (CC: ${auditCcEmail})`,
           title: `Guía Confirmó Salida #${booking.code}`,
           message: `Correo enviado al cliente habilitando pago seguro con copia a ${auditCcEmail}.`,
-          status: 'sent',
+          status: emailResult.success ? 'sent' : 'failed',
           timestamp: new Date().toISOString(),
-          emailPreviewUrl: previewUrl,
+          emailPreviewUrl: emailResult.previewUrl,
         });
-
-        console.log(`[Email] Correo de Aceptación a Cliente enviado: ${info.messageId}`);
       } catch (err) {
         console.error('[Email] Error enviando email de aceptación de operador:', err);
       }
@@ -443,19 +439,12 @@ ${checkoutUrl}
     // 1. Email al cliente con CC a la plataforma
     if (settings.notificationChannels.emailCustomer && booking.leadCustomer.email) {
       try {
-        const { transporter, isSimulated } = await this.getMailTransporter(settings);
-
-        let fromAddress = settings.smtpConfig.from;
-        if (settings.smtpConfig.host.includes('resend.com') && fromAddress.includes('terraaventura.com')) {
-          fromAddress = '"TerraAventura Tours" <onboarding@resend.dev>';
-        }
-
         let toAddress = booking.leadCustomer.email;
-        if (settings.smtpConfig.host.includes('resend.com') && (toAddress.includes('test') || toAddress.includes('ejemplo.com'))) {
-          toAddress = 'euryhealer@gmail.com';
+        if (toAddress.includes('test') || toAddress.includes('ejemplo.com') || toAddress.includes('@test')) {
+          toAddress = auditCcEmail || 'euryhealer@gmail.com';
         }
 
-        const ccAddress = (auditCcEmail && auditCcEmail !== toAddress && !auditCcEmail.includes('terraaventura.com'))
+        const ccAddress = (auditCcEmail && auditCcEmail !== toAddress)
           ? auditCcEmail
           : undefined;
 
@@ -472,15 +461,13 @@ ${checkoutUrl}
           </div>
         `;
 
-        const info = await transporter.sendMail({
-          from: fromAddress,
+        const emailResult = await this.sendEmail({
           to: toAddress,
-          ...(ccAddress ? { cc: ccAddress } : {}),
+          cc: ccAddress,
           subject: `ℹ️ Actualización sobre tu solicitud: ${tour.title} (${booking.code})`,
           html: emailHtml,
+          settings,
         });
-
-        const previewUrl = isSimulated ? nodemailer.getTestMessageUrl(info) || undefined : undefined;
         db.addNotification({
           id: `notif-email-declined-${Date.now()}`,
           bookingId: booking.id,
