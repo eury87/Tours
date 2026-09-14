@@ -17,11 +17,11 @@ export interface BoldCheckoutConfig {
 
 export class BoldService {
   private getApiKey(): string {
-    return process.env.BOLD_IDENTITY_KEY || process.env.BOLD_API_KEY || 'bold_identity_test_key';
+    return process.env.BOLD_IDENTITY_KEY || process.env.BOLD_API_KEY || 'BqWdkYQkwimQZp1XluKarQiV108rJcb_GfBnHoG6YgM';
   }
 
   private getSecretKey(): string {
-    return process.env.BOLD_SECRET_KEY || 'bold_secret_test_key';
+    return process.env.BOLD_SECRET_KEY || 'VRtDxd29lCm4rDL1IoeYGg';
   }
 
   public getExchangeRate(): number {

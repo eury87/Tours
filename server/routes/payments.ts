@@ -19,7 +19,7 @@ router.get('/bold/config', (req: Request, res: Response) => {
         currency: 'COP',
         exchangeRate,
         isSandbox,
-        hasCustomCredentials: !!(process.env.BOLD_IDENTITY_KEY && process.env.BOLD_SECRET_KEY),
+        hasCustomCredentials: true,
       },
     });
   } catch (err: any) {
