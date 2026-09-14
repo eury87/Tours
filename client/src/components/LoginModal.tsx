@@ -17,7 +17,11 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { User as UserType } from '../types';
 import { supabase } from '../supabaseClient';
 
-export const LoginModal: React.FC = () => {
+interface LoginModalProps {
+  onLoginSuccess?: (role?: string) => void;
+}
+
+export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
   const { isLoginModalOpen, closeLoginModal, switchUser, currentUser } = useAuth();
   const { t } = useLanguage();
   
@@ -46,6 +50,38 @@ export const LoginModal: React.FC = () => {
 
   if (!isLoginModalOpen) return null;
 
+  const handleQuickLogin = (userRole: string, userEmail: string) => {
+    setIsLoading(true);
+    setErrorMessage('');
+    const found = usersList.find(u => u.email.toLowerCase() === userEmail.toLowerCase() || u.role === userRole);
+    if (found) {
+      switchUser(found);
+      onLoginSuccess?.(found.role);
+      closeLoginModal();
+      setIsLoading(false);
+      return;
+    }
+
+    // Fallback manual request
+    fetch('/api/auth/login-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, password: '123' }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.user) {
+          switchUser(data.data.user);
+          onLoginSuccess?.(data.data.user.role);
+          closeLoginModal();
+        } else {
+          setErrorMessage(data.error || 'Error al iniciar sesión');
+        }
+      })
+      .catch(err => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
+  };
+
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -61,6 +97,7 @@ export const LoginModal: React.FC = () => {
 
       if (data.success && data.data?.user) {
         switchUser(data.data.user);
+        onLoginSuccess?.(data.data.user.role);
         closeLoginModal();
       } else {
         setErrorMessage(data.error || 'Credenciales inválidas');
@@ -114,9 +151,10 @@ export const LoginModal: React.FC = () => {
       if (data.success && data.data?.user) {
         setSuccessMessage(`¡Cuenta creada con éxito para ${regName}!`);
         switchUser(data.data.user);
+        onLoginSuccess?.(data.data.user.role);
         setTimeout(() => {
           closeLoginModal();
-        }, 1200);
+        }, 1000);
       } else {
         setErrorMessage(data.error || 'No se pudo crear la cuenta de agente');
       }
@@ -196,9 +234,77 @@ export const LoginModal: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 1: LOGIN (GOOGLE + MANUAL) */}
+        {/* TAB 1: LOGIN (GOOGLE + MANUAL + FAST DEMO) */}
         {tab === 'login' && (
           <div className="space-y-4">
+            
+            {/* Quick 1-Click Access for Owner, Guide, SaaS */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#E8E1D1] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Acceso Rápido (1 Clic)
+                </span>
+                <span className="text-[10px] text-stone-400">Sin contraseñas</span>
+              </div>
+
+              {/* Botón Dueño */}
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('company_admin', 'owner@terraaventura.com')}
+                disabled={isLoading}
+                className="w-full text-left p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all flex items-center justify-between group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-300 font-bold text-xs shrink-0">
+                    👑
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-amber-200 group-hover:text-amber-100 flex items-center gap-1.5">
+                      <span>Dueño de la Agencia (Lucía)</span>
+                      <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md font-mono">
+                        Todos los Tours
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-stone-400">
+                      owner@terraaventura.com &bull; Ver & Crear Tours
+                    </div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              </button>
+
+              {/* Botón Guía */}
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('operator', 'carlos.mendoza@terraaventura.com')}
+                disabled={isLoading}
+                className="w-full text-left p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center justify-between group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-300 font-bold text-xs shrink-0">
+                    🧭
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-emerald-200 group-hover:text-emerald-100 flex items-center gap-1.5">
+                      <span>Guía Oficial (Carlos Mendoza)</span>
+                      <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-md font-mono">
+                        QR & Manifiesto
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-stone-400">
+                      carlos.mendoza@terraaventura.com &bull; Validar Pasajeros
+                    </div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              </button>
+            </div>
+
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-white/10 w-full"></div>
+              <span className="bg-[#181A17] px-3 text-[11px] text-slate-500 uppercase font-semibold">o con tu cuenta</span>
+            </div>
+
             {/* Google Button */}
             <button
               type="button"
@@ -217,19 +323,28 @@ export const LoginModal: React.FC = () => {
 
             <div className="relative flex items-center justify-center">
               <div className="border-t border-white/10 w-full"></div>
-              <span className="bg-[#181A17] px-3 text-[11px] text-slate-500 uppercase font-semibold">o con correo</span>
+              <span className="bg-[#181A17] px-3 text-[11px] text-slate-500 uppercase font-semibold">o correo manual</span>
             </div>
 
             {/* Manual Form */}
             <form onSubmit={handleManualLogin} className="space-y-3">
               <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Correo Electrónico</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-slate-400 font-semibold block">Correo Electrónico</label>
+                  <button
+                    type="button"
+                    onClick={() => { setEmail('owner@terraaventura.com'); setPassword('123456'); }}
+                    className="text-[10px] text-[#E8E1D1] hover:underline font-semibold"
+                  >
+                    👑 Autollenar Dueño
+                  </button>
+                </div>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                   <input
                     type="email"
                     required
-                    placeholder="agente@terraaventura.com"
+                    placeholder="owner@terraaventura.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:border-[#E8E1D1] focus:outline-none"

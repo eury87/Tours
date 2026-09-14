@@ -28,12 +28,21 @@ export function AppContent() {
   const { activeRole, currentUser } = useAuth();
   const { t } = useLanguage();
 
-  // Redirigir al panel de administración cuando se inicia sesión como agente o administrador
+  // Redirigir al panel de administración o manifiesto al iniciar sesión
   useEffect(() => {
     if (currentUser && (currentUser.role === 'company_admin' || currentUser.role === 'agent' || currentUser.role === 'superadmin')) {
       setCurrentView('admin');
+    } else if (currentUser && currentUser.role === 'operator') {
+      setCurrentView('manifest');
     }
   }, [currentUser?.id, currentUser?.role]);
+
+  // Limpiar cualquier fragmento hash (#) en la URL al cargar
+  useEffect(() => {
+    if (window.location.hash) {
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
+  }, []);
 
   // Escuchar enlaces de pago por WhatsApp/Email o retorno de Bold (?bookingId=bkg-xxx&status=completed)
   useEffect(() => {
@@ -137,7 +146,7 @@ export function AppContent() {
       />
 
       {/* Modals */}
-      <LoginModal />
+      <LoginModal onLoginSuccess={(role) => setCurrentView(role === 'operator' ? 'manifest' : 'admin')} />
 
       <TourDetailModal
         tour={selectedTourForDetails}
