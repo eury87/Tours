@@ -17,6 +17,7 @@ import { notificationService } from './services/notificationService';
 import { whatsappQrService } from './services/whatsappQrService';
 
 import uploadsRouter from './routes/uploads';
+import paymentsRouter from './routes/payments';
 import { storageService, UPLOADS_DIR } from './services/storageService';
 
 const app = express();
@@ -64,6 +65,7 @@ app.use('/api/notifications', notificationsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/payments', paymentsRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString(), service: 'Tours Booking & Notification API' });

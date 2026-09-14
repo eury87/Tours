@@ -18,7 +18,8 @@ import {
   User,
   Tag,
   AlertCircle,
-  Send
+  Send,
+  ShieldCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import QRCode from 'qrcode';
@@ -102,6 +103,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
   const [createdBooking, setCreatedBooking] = useState<Booking | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [connectedWhatsAppPhone, setConnectedWhatsAppPhone] = useState<string>('50767546550');
+  const [exchangeRateCOP, setExchangeRateCOP] = useState<number>(4200);
+  const [boldConfig, setBoldConfig] = useState<{ currency: string; exchangeRate: number; isSandbox: boolean; hasCustomCredentials: boolean } | null>(null);
 
   useEffect(() => {
     fetch('/api/whatsapp/status')
@@ -109,6 +112,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
       .then(data => {
         if (data.data?.connected && data.data?.phone) {
           setConnectedWhatsAppPhone(data.data.phone);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/payments/bold/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.exchangeRate) {
+          setExchangeRateCOP(data.data.exchangeRate);
+          setBoldConfig(data.data);
         }
       })
       .catch(() => {});
@@ -174,6 +187,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
   const subtotal = Math.max(0, subtotalRaw - couponDiscount);
   const tax = subtotal * 0.10;
   const totalAmount = subtotal + tax;
+  const boldAmountCOP = Math.round((totalAmount * exchangeRateCOP) / 100) * 100;
 
   const toggleAddOn = (addon: AddOn) => {
     setSelectedAddOns(prev => 
@@ -271,8 +285,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
         language,
         paymentDetails: {
-          cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : '4242'),
-          cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : 'Test Gateway'),
+          cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : (activeMethod === 'bold' ? '8888' : '4242')),
+          cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : (activeMethod === 'bold' ? 'Bold Colombia (PSE/Nequi/Tarjeta)' : 'Test Gateway')),
           transferReceiptUrl: transferProofUploaded ? 'https://example.com/receipt-sample.png' : undefined,
         },
       };
@@ -285,8 +299,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
           body: JSON.stringify({
             paymentStatus: 'completed',
             status: 'paid',
-            cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : '4242'),
-            cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : 'Test Gateway'),
+            cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : (activeMethod === 'bold' ? '8888' : '4242')),
+            cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : (activeMethod === 'bold' ? 'Bold Colombia (PSE/Nequi/Tarjeta)' : 'Test Gateway')),
           }),
         });
         const data = await res.json();
@@ -738,10 +752,26 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                   </div>
 
                   {/* Payment selector */}
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <button
+                      onClick={() => setPaymentMethod('bold')}
+                      className={`p-3 rounded-2xl border text-center transition-all relative overflow-hidden ${
+                        paymentMethod === 'bold'
+                          ? 'bg-[#1a2331] border-[#E8E1D1] text-white shadow-lg shadow-black/30'
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-[9px] font-black text-emerald-400">
+                        COL
+                      </div>
+                      <ShieldCheck className="w-5 h-5 mx-auto mb-1 text-emerald-400" />
+                      <span className="text-xs font-bold block">Bold</span>
+                      <span className="text-[10px] text-slate-400 block truncate">PSE • Nequi • Cards</span>
+                    </button>
+
                     <button
                       onClick={() => setPaymentMethod('credit_card')}
-                      className={`p-3.5 rounded-2xl border text-center transition-all ${
+                      className={`p-3 rounded-2xl border text-center transition-all ${
                         paymentMethod === 'credit_card'
                           ? 'bg-[#1a2331] border-[#E8E1D1] text-white shadow-lg shadow-black/30'
                           : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -749,11 +779,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                     >
                       <CreditCard className="w-5 h-5 mx-auto mb-1 text-[#E8E1D1]" />
                       <span className="text-xs font-bold block">{t('creditCard')}</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Visa • Master</span>
                     </button>
 
                     <button
                       onClick={() => setPaymentMethod('mercadopago')}
-                      className={`p-3.5 rounded-2xl border text-center transition-all ${
+                      className={`p-3 rounded-2xl border text-center transition-all ${
                         paymentMethod === 'mercadopago'
                           ? 'bg-[#1a2331] border-[#E8E1D1] text-white shadow-lg shadow-black/30'
                           : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -761,11 +792,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                     >
                       <Sparkles className="w-5 h-5 mx-auto mb-1 text-[#E8E1D1]" />
                       <span className="text-xs font-bold block">{t('mercadoPago')}</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Latam</span>
                     </button>
 
                     <button
                       onClick={() => setPaymentMethod('bank_transfer')}
-                      className={`p-3.5 rounded-2xl border text-center transition-all ${
+                      className={`p-3 rounded-2xl border text-center transition-all ${
                         paymentMethod === 'bank_transfer'
                           ? 'bg-[#1a2331] border-[#E8E1D1] text-white shadow-lg shadow-black/30'
                           : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -773,9 +805,78 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                     >
                       <FileText className="w-5 h-5 mx-auto mb-1 text-amber-400" />
                       <span className="text-xs font-bold block">{t('bankTransfer')}</span>
+                      <span className="text-[10px] text-slate-400 block truncate">Depósito</span>
                     </button>
                   </div>
                 </>
+              )}
+
+              {/* Bold Colombia Gateway Details */}
+              {paymentMethod === 'bold' && (
+                <div className="p-5 rounded-2xl bg-gradient-to-b from-[#182232] to-[#121722] border border-blue-500/30 space-y-4 shadow-xl">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-heading font-black text-lg shadow-inner">
+                        B
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-heading font-bold text-white text-sm">Pasarela Bold Colombia</h4>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-black text-emerald-400">
+                            bold.co oficial
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          Cobro en Pesos Colombianos con medios de pago locales
+                        </p>
+                      </div>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  </div>
+
+                  {/* Badges de Medios de Pago Bold */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[11px] font-bold text-white flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-400"></span> PSE (Todos los Bancos)
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[11px] font-bold text-purple-300 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-purple-400"></span> Nequi
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[11px] font-bold text-red-300 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-400"></span> Daviplata
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[11px] font-bold text-yellow-300 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-yellow-400"></span> Botón Bancolombia
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 text-[11px] font-bold text-slate-200">
+                      💳 Tarjetas Débito / Crédito
+                    </span>
+                  </div>
+
+                  {/* Caja de Conversión de Moneda COP */}
+                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">Total a liquidar en Bold</span>
+                      <div className="font-heading font-black text-emerald-400 text-lg">
+                        ${boldAmountCOP.toLocaleString('es-CO')} COP
+                      </div>
+                    </div>
+                    <div className="text-right text-[11px] text-slate-400">
+                      <div>Equivalente: <strong className="text-white">${totalAmount.toFixed(2)} USD</strong></div>
+                      <div className="text-[10px] text-slate-500">Tasa: 1 USD = ${exchangeRateCOP.toLocaleString('es-CO')} COP</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-500/20 text-xs text-slate-300 flex items-start gap-2.5">
+                    <Lock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-white block">Integridad Criptográfica SHA-256</span>
+                      <span className="text-[11px] text-slate-400">
+                        Al confirmar, se procesará la reserva de manera segura con Bold. Al instante recibirás tu Factura digital y Pase de Abordaje QR en WhatsApp y correo.
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Card Form */}
@@ -980,9 +1081,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
 
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">{t('totalEstimated')}</span>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold">
+                  {paymentMethod === 'bold' ? 'Total en Pesos COP' : t('totalEstimated')}
+                </span>
                 <div className="font-heading font-extrabold text-white text-base">
-                  ${totalAmount.toFixed(2)} USD
+                  {paymentMethod === 'bold'
+                    ? `$${boldAmountCOP.toLocaleString('es-CO')} COP`
+                    : `$${totalAmount.toFixed(2)} USD`}
                 </div>
               </div>
 
@@ -1013,14 +1118,22 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                 <button
                   onClick={() => handleFinalizeBooking()}
                   disabled={isProcessing}
-                  className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#E8E1D1] hover:bg-[#F8F5EE] text-[#152230] font-black text-sm shadow-xl shadow-black/40 transition-all hover:scale-105 disabled:opacity-50"
+                  className={`flex items-center gap-2 px-7 py-3 rounded-xl font-black text-sm shadow-xl transition-all hover:scale-105 disabled:opacity-50 ${
+                    paymentMethod === 'bold'
+                      ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-600/30'
+                      : 'bg-[#E8E1D1] hover:bg-[#F8F5EE] text-[#152230] shadow-black/40'
+                  }`}
                 >
                   {isProcessing ? (
                     <span>{t('processingBooking')}</span>
                   ) : (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>{t('payAndConfirm')} (${totalAmount.toFixed(2)} USD)</span>
+                      <span>
+                        {paymentMethod === 'bold'
+                          ? `Pagar con Bold ($${boldAmountCOP.toLocaleString('es-CO')} COP)`
+                          : `${t('payAndConfirm')} ($${totalAmount.toFixed(2)} USD)`}
+                      </span>
                     </>
                   )}
                 </button>

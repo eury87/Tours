@@ -126,7 +126,7 @@ router.post('/', async (req: Request, res: Response) => {
     const requestedPaymentStatus = req.body.paymentStatus as PaymentStatus | undefined;
     
     // Si el tour requiere aprobación de guía, SIEMPRE queda en estado pending con cobro pendiente
-    const isActuallyPaid = !isTourRequiringApproval && requestedPaymentStatus !== 'pending' && (paymentMethod === 'credit_card' || paymentMethod === 'mercadopago' || paymentMethod === 'paypal');
+    const isActuallyPaid = !isTourRequiringApproval && requestedPaymentStatus !== 'pending' && (paymentMethod === 'credit_card' || paymentMethod === 'mercadopago' || paymentMethod === 'paypal' || paymentMethod === 'bold');
 
     const newBooking: Booking = {
       id: `bkg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,

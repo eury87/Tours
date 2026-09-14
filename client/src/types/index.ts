@@ -47,7 +47,7 @@ export interface AddOn {
 
 export type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'boarded' | 'cancelled';
 export type PaymentStatus = 'pending' | 'completed' | 'processing' | 'rejected';
-export type PaymentMethod = 'credit_card' | 'mercadopago' | 'paypal' | 'bank_transfer';
+export type PaymentMethod = 'credit_card' | 'mercadopago' | 'paypal' | 'bank_transfer' | 'bold';
 
 export interface Booking {
   id: string;
