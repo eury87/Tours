@@ -36,7 +36,8 @@ export const AdminDashboard: React.FC = () => {
   const { t } = useLanguage();
   const [tours, setTours] = useState<Tour[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
-  const [activeTab, setActiveTab] = useState<'tours' | 'operators' | 'coupons'>('tours');
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [activeTab, setActiveTab] = useState<'tours' | 'bookings' | 'operators' | 'coupons'>('tours');
   
   // Modales de Tours y Operadores
   const [showTourModal, setShowTourModal] = useState(false);
@@ -296,6 +297,18 @@ export const AdminDashboard: React.FC = () => {
         >
           <Compass className="w-4 h-4" />
           <span>Mis Tours ({tours.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('bookings')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'bookings'
+              ? 'bg-[#E8E1D1] text-[#152230] font-black shadow-lg'
+              : 'bg-[#1C1E1B] text-stone-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Reservas ({liveBookings.length})</span>
         </button>
 
         <button

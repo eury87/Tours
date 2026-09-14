@@ -15,6 +15,7 @@ import { QrScannerModal } from './pages/QrScannerModal';
 import { SettingsPage } from './pages/SettingsPage';
 import { SaasSuperAdmin } from './pages/SaasSuperAdmin';
 import { PalettePreviewModal } from './components/PalettePreviewModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Tour, Booking } from './types';
 import { Compass, ShieldCheck, Mail, MessageSquare, Palette } from 'lucide-react';
 
@@ -124,18 +125,20 @@ export function AppContent() {
 
       {/* Main Content Area */}
       <main className={`flex-1 w-full relative z-10 ${currentView === 'catalog' ? 'pb-16' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16'}`}>
-        {currentView === 'catalog' && (
-          <TourCatalog
-            onBookTour={(tour) => setSelectedTourForBooking(tour)}
-            onViewTourDetails={(tour) => setSelectedTourForDetails(tour)}
-          />
-        )}
+        <ErrorBoundary fallbackView={() => setCurrentView('catalog')}>
+          {currentView === 'catalog' && (
+            <TourCatalog
+              onBookTour={(tour) => setSelectedTourForBooking(tour)}
+              onViewTourDetails={(tour) => setSelectedTourForDetails(tour)}
+            />
+          )}
 
-        {currentView === 'admin' && <AdminDashboard />}
-        {currentView === 'manifest' && <OperatorManifest />}
-        {currentView === 'scanner' && <QrScannerModal />}
-        {currentView === 'settings' && <SettingsPage />}
-        {currentView === 'saas' && <SaasSuperAdmin />}
+          {currentView === 'admin' && <AdminDashboard />}
+          {currentView === 'manifest' && <OperatorManifest />}
+          {currentView === 'scanner' && <QrScannerModal />}
+          {currentView === 'settings' && <SettingsPage />}
+          {currentView === 'saas' && <SaasSuperAdmin />}
+        </ErrorBoundary>
       </main>
 
       {/* Floating Realtime Alerts */}
