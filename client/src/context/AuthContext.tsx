@@ -54,6 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (d.data?.user) {
         setCurrentUser(d.data.user);
         localStorage.setItem('terra_auth_user', JSON.stringify(d.data.user));
+        if (window.location.hash) {
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        }
       }
     } catch (err) {
       console.error('Error sincronizando usuario Google con backend:', err);
