@@ -185,7 +185,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
         notes: initialBooking.leadCustomer.notes || '',
       });
       setPassengers(initialBooking.passengers);
-      setStep(initialStep || 4);
+      setCreatedBooking(initialBooking);
+
+      if (initialBooking.paymentStatus === 'completed') {
+        QRCode.toDataURL(`TOUR_BOARDING_PASS:${initialBooking.code}:${initialBooking.id}`, {
+          margin: 1,
+          width: 250,
+          color: { dark: '#022c22', light: '#ffffff' }
+        }).then(uri => setQrCodeDataUrl(uri)).catch(() => {});
+        setStep(5);
+      } else {
+        setStep(initialStep || 4);
+      }
     }
   }, [initialBooking, initialStep]);
 

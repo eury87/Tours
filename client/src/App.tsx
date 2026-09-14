@@ -35,29 +35,59 @@ export function AppContent() {
     }
   }, [currentUser?.id, currentUser?.role]);
 
-  // Escuchar enlaces de pago por WhatsApp/Email (?bookingId=bkg-xxx&step=checkout)
+  // Escuchar enlaces de pago por WhatsApp/Email o retorno de Bold (?bookingId=bkg-xxx&status=completed)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get('bookingId');
     const step = params.get('step');
+    const paymentGateway = params.get('payment_gateway');
+    const status = params.get('status');
 
-    if (bookingId && step === 'checkout') {
-      fetch(`/api/bookings/${bookingId}`)
-        .then(res => res.json())
-        .then(bData => {
-          if (bData.success && bData.data) {
-            const booking: Booking = bData.data;
-            setExistingBookingForCheckout(booking);
-            fetch(`/api/tours/${booking.tourId}`)
-              .then(res => res.json())
-              .then(tData => {
-                if (tData.success && tData.data) {
-                  setSelectedTourForBooking(tData.data);
-                }
-              });
-          }
+    if (bookingId && (step === 'checkout' || paymentGateway === 'bold' || status === 'completed')) {
+      if (paymentGateway === 'bold' || status === 'completed') {
+        fetch(`/api/bookings/${bookingId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentStatus: 'completed',
+            status: 'paid',
+            cardBrand: 'Bold Colombia Oficial (PSE/Nequi/Tarjeta)',
+            cardLast4: '1111',
+          }),
         })
-        .catch(err => console.error('Error cargando reserva de pago:', err));
+          .then(res => res.json())
+          .then(bData => {
+            if (bData.success && bData.data) {
+              const booking: Booking = bData.data;
+              setExistingBookingForCheckout(booking);
+              fetch(`/api/tours/${booking.tourId}`)
+                .then(res => res.json())
+                .then(tData => {
+                  if (tData.success && tData.data) {
+                    setSelectedTourForBooking(tData.data);
+                  }
+                });
+            }
+          })
+          .catch(err => console.error('Error procesando retorno de Bold:', err));
+      } else {
+        fetch(`/api/bookings/${bookingId}`)
+          .then(res => res.json())
+          .then(bData => {
+            if (bData.success && bData.data) {
+              const booking: Booking = bData.data;
+              setExistingBookingForCheckout(booking);
+              fetch(`/api/tours/${booking.tourId}`)
+                .then(res => res.json())
+                .then(tData => {
+                  if (tData.success && tData.data) {
+                    setSelectedTourForBooking(tData.data);
+                  }
+                });
+            }
+          })
+          .catch(err => console.error('Error cargando reserva de pago:', err));
+      }
     }
   }, []);
 
@@ -119,7 +149,7 @@ export function AppContent() {
         tour={selectedTourForBooking}
         isOpen={!!selectedTourForBooking}
         initialBooking={existingBookingForCheckout}
-        initialStep={existingBookingForCheckout ? 4 : 1}
+        initialStep={existingBookingForCheckout ? (existingBookingForCheckout.paymentStatus === 'completed' ? 5 : 4) : 1}
         onClose={() => {
           setSelectedTourForBooking(null);
           setExistingBookingForCheckout(null);
