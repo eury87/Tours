@@ -78,8 +78,9 @@ export class BoldService {
       description: `Reserva ${booking.code} - ${booking.tourTitle.substring(0, 40)}`,
       tax: 0,
       redirectionUrl,
+      renderMode: 'embedded',
       isSandbox: this.isSandbox(),
-    };
+    } as any;
   }
 
   /**

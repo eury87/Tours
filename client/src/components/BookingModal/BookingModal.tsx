@@ -127,6 +127,49 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
       .catch(() => {});
   }, []);
 
+  // Escuchar eventos de Bold Checkout postMessage cuando el usuario paga en el modal oficial de Bold
+  useEffect(() => {
+    const handleBoldPostMessage = async (event: MessageEvent) => {
+      const isBoldEvent = event.data?.type === 'BOLD_CHECKOUT_EVENT' || 
+                          event.data?.event === 'APPROVED' || 
+                          event.data?.status === 'APPROVED' ||
+                          (typeof event.data === 'string' && event.data.includes('BOLD'));
+      
+      if (isBoldEvent && createdBooking) {
+        console.log('[Bold Checkout Event Received]', event.data);
+        try {
+          const res = await fetch(`/api/bookings/${createdBooking.id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paymentStatus: 'completed',
+              status: 'paid',
+              cardBrand: 'Bold Colombia Oficial (PSE/Nequi/Tarjeta)',
+              cardLast4: '8888',
+            }),
+          });
+          const data = await res.json();
+          if (data.data) {
+            setCreatedBooking(data.data);
+            const qrUri = await QRCode.toDataURL(`TOUR_BOARDING_PASS:${data.data.code}:${data.data.id}`, {
+              margin: 1,
+              width: 250,
+              color: { dark: '#022c22', light: '#ffffff' }
+            });
+            setQrCodeDataUrl(qrUri);
+            confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+            setStep(5);
+          }
+        } catch (e) {
+          console.error('Error procesando confirmación de Bold:', e);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleBoldPostMessage);
+    return () => window.removeEventListener('message', handleBoldPostMessage);
+  }, [createdBooking]);
+
   // Prellenar datos si viene de un enlace de pago aprobado por el operador
   useEffect(() => {
     if (initialBooking) {
@@ -293,30 +336,72 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
 
       let booking: Booking;
       if (initialBooking) {
-        const res = await fetch(`/api/bookings/${initialBooking.id}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentStatus: 'completed',
-            status: 'paid',
-            cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : (activeMethod === 'bold' ? '8888' : '4242')),
-            cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : (activeMethod === 'bold' ? 'Bold Colombia (PSE/Nequi/Tarjeta)' : 'Test Gateway')),
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al procesar pago');
-        booking = data.data;
+        if (overrides?.paymentStatus === 'completed' || finalPaymentStatus === 'completed') {
+          const res = await fetch(`/api/bookings/${initialBooking.id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paymentStatus: 'completed',
+              status: 'paid',
+              cardLast4: overrides?.cardLast4 || (activeMethod === 'credit_card' ? cardNumber.slice(-4) : (activeMethod === 'bold' ? '8888' : '4242')),
+              cardBrand: overrides?.cardBrand || (activeMethod === 'credit_card' ? 'Visa' : (activeMethod === 'bold' ? 'Bold Colombia (PSE/Nequi/Tarjeta)' : 'Test Gateway')),
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Error al procesar pago');
+          booking = data.data;
+        } else {
+          booking = initialBooking;
+        }
       } else {
+        const isBoldRealCheckout = activeMethod === 'bold' && !overrides?.paymentStatus && !tour.requiresOperatorApproval;
         const res = await fetch('/api/bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            ...payload,
+            paymentStatus: isBoldRealCheckout ? 'pending' : finalPaymentStatus,
+            status: isBoldRealCheckout ? 'pending' : (finalPaymentStatus === 'completed' ? 'paid' : 'pending'),
+          }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al procesar reserva');
         booking = data.data;
       }
       setCreatedBooking(booking);
+
+      // Si es Bold y no es una aprobación forzada directa, abrir el checkout oficial de Bold
+      if (activeMethod === 'bold' && !overrides?.paymentStatus && (!tour.requiresOperatorApproval || initialBooking)) {
+        try {
+          const sessionRes = await fetch('/api/payments/bold/create-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: booking.id }),
+          });
+          const sessionData = await sessionRes.json();
+          if (sessionData.success && sessionData.data) {
+            const cfg = sessionData.data;
+            if ((window as any).BoldCheckout) {
+              const checkout = new (window as any).BoldCheckout({
+                apiKey: cfg.apiKey,
+                orderId: cfg.orderId,
+                amount: String(cfg.amountCOP),
+                currency: cfg.currency,
+                integritySignature: cfg.integritySignature,
+                description: cfg.description,
+                tax: '0',
+                renderMode: 'embedded',
+                redirectionUrl: cfg.redirectionUrl,
+              });
+              checkout.open();
+              setIsProcessing(false);
+              return;
+            }
+          }
+        } catch (boldErr) {
+          console.warn('[Bold] Error abriendo checkout oficial:', boldErr);
+        }
+      }
 
       const qrUri = await QRCode.toDataURL(`TOUR_BOARDING_PASS:${booking.code}:${booking.id}`, {
         margin: 1,
@@ -872,9 +957,22 @@ export const BookingModal: React.FC<BookingModalProps> = ({ tour, isOpen, onClos
                     <div>
                       <span className="font-bold text-white block">Integridad Criptográfica SHA-256</span>
                       <span className="text-[11px] text-slate-400">
-                        Al confirmar, se procesará la reserva de manera segura con Bold. Al instante recibirás tu Factura digital y Pase de Abordaje QR en WhatsApp y correo.
+                        Al pulsar "Pagar con Bold", se abrirá el checkout oficial de Bold en pantalla para que elijas PSE, Nequi o digites tu tarjeta de pruebas.
                       </span>
                     </div>
+                  </div>
+
+                  {/* Acceso Rápido Sandbox */}
+                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs">
+                    <span className="text-slate-400 text-[11px]">¿Saltar formulario y simular pago exitoso?</span>
+                    <button
+                      type="button"
+                      onClick={() => handleFinalizeBooking({ paymentStatus: 'completed', paymentMethod: 'bold' })}
+                      className="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/40 text-blue-300 font-bold text-[11px] transition-all flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Simulación Inmediata</span>
+                    </button>
                   </div>
                 </div>
               )}
